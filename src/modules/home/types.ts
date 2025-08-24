@@ -94,3 +94,21 @@ export interface AxisConfig {
     };
   };
 }
+
+// ASSET TYPES
+export type ChartPoint = {
+  date: string; // "YYYY-MM-DD"
+  price: number;
+  buyPoint: boolean;
+  sellPoint: boolean;
+  buyAmount: number;
+  sellAmount: number;
+};
+
+export type Asset = {
+  logo: string;
+  symbol: string;
+  name: string;
+  price: number;
+  chart: ChartPoint[];
+};

@@ -1,15 +1,17 @@
+import { assets } from "@/modules/home/constant";
+import { Asset } from "@/modules/home/types";
 import { create } from "zustand";
 
 type CounterState = {
-  assets: Asset[];
-  setAssets: (assets: Asset[]) => void;
-  selectedAsset: Asset | null;
-  setSelectedAsset: (asset: Asset | null) => void;
+  tokens: Asset[];
+  setTokens: (assets: Asset[]) => void;
+  selectedTokens: Asset[];
+  setSelectedTokens: (selectedTokens: Asset[]) => void;
 };
 
 export const useMainStore = create<CounterState>()((set) => ({
-  assets: [],
-  setAssets: (assets: Asset[]) => set({ assets }),
-  selectedAsset: null,
-  setSelectedAsset: (asset: Asset | null) => set({ selectedAsset }),
+  tokens: assets,
+  setTokens: (tokens: Asset[]) => set({ tokens }),
+  selectedTokens: [assets[0]],
+  setSelectedTokens: (selectedTokens: Asset[]) => set({ selectedTokens }),
 }));

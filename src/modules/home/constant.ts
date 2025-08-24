@@ -1,0 +1,148 @@
+import { Asset } from "./types";
+import { makeChart } from "./utils/makeChart";
+
+const cmc = (id: number) =>
+  `https://s2.coinmarketcap.com/static/img/coins/64x64/${id}.png`;
+
+export const assets: Asset[] = [
+  //   {
+  //     logo: cmc(1),
+  //     symbol: "BTC",
+  //     name: "Bitcoin",
+  //     price: 671230,
+  //     chart: makeChart(665000, 1),
+  //   },
+  //   {
+  //     logo: cmc(1027),
+  //     symbol: "ETH",
+  //     name: "Ethereum",
+  //     price: 312500,
+  //     chart: makeChart(305000, 2),
+  //   },
+  //   {
+  //     logo: cmc(825),
+  //     symbol: "USDT",
+  //     name: "Tether",
+  //     price: 10000,
+  //     chart: makeChart(10000, 3),
+  //   },
+  //   {
+  //     logo: cmc(1839),
+  //     symbol: "BNB",
+  //     name: "BNB",
+  //     price: 59200,
+  //     chart: makeChart(58000, 4),
+  //   },
+  //   {
+  //     logo: cmc(52),
+  //     symbol: "XRP",
+  //     name: "XRP",
+  //     price: 62,
+  //     chart: makeChart(60, 5),
+  //   },
+  //   {
+  //     logo: cmc(3408),
+  //     symbol: "USDC",
+  //     name: "USD Coin",
+  //     price: 10000,
+  //     chart: makeChart(10000, 6),
+  //   },
+  //   {
+  //     logo: cmc(2010),
+  //     symbol: "ADA",
+  //     name: "Cardano",
+  //     price: 78,
+  //     chart: makeChart(75, 7),
+  //   },
+  //   {
+  //     logo: cmc(74),
+  //     symbol: "DOGE",
+  //     name: "Dogecoin",
+  //     price: 18,
+  //     chart: makeChart(17, 8),
+  //   },
+  //   {
+  //     logo: cmc(5426),
+  //     symbol: "SOL",
+  //     name: "Solana",
+  //     price: 14500,
+  //     chart: makeChart(14000, 9),
+  //   },
+  //   {
+  //     logo: cmc(1958),
+  //     symbol: "TRX",
+  //     name: "TRON",
+  //     price: 11,
+  //     chart: makeChart(10, 10),
+  //   },
+  {
+    logo: cmc(11419),
+    symbol: "TON",
+    name: "Toncoin",
+    price: 720,
+    chart: makeChart(690, 11),
+  },
+  {
+    logo: cmc(6636),
+    symbol: "DOT",
+    name: "Polkadot",
+    price: 680,
+    chart: makeChart(640, 12),
+  },
+  {
+    logo: cmc(2),
+    symbol: "LTC",
+    name: "Litecoin",
+    price: 8800,
+    chart: makeChart(8500, 13),
+  },
+  {
+    logo: cmc(3890),
+    symbol: "MATIC",
+    name: "Polygon",
+    price: 95,
+    chart: makeChart(92, 14),
+  },
+  {
+    logo: cmc(5994),
+    symbol: "SHIB",
+    name: "Shiba Inu",
+    price: 0.02,
+    chart: makeChart(0.019, 15),
+  },
+  {
+    logo: cmc(5805),
+    symbol: "AVAX",
+    name: "Avalanche",
+    price: 3600,
+    chart: makeChart(3500, 16),
+  },
+  {
+    logo: cmc(1975),
+    symbol: "LINK",
+    name: "Chainlink",
+    price: 1450,
+    chart: makeChart(1400, 17),
+  },
+  {
+    logo: cmc(7083),
+    symbol: "UNI",
+    name: "Uniswap",
+    price: 780,
+    chart: makeChart(750, 18),
+  },
+  {
+    logo: cmc(512),
+    symbol: "XLM",
+    name: "Stellar",
+    price: 12,
+    chart: makeChart(11, 19),
+  },
+  {
+    logo: cmc(3794),
+    symbol: "ATOM",
+    name: "Cosmos",
+    price: 920,
+    chart: makeChart(900, 20),
+  },
+];
