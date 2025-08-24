@@ -249,11 +249,12 @@ export const MultiLineChart = ({
               padding: axisPadding,
               maxRotation: 0,
               minRotation: 0,
-              callback: function (value, index, ticks) {
-                if (index === 0) return this.getLabelForValue(value as number);
-                if (index === ticks.length - 1) return this.getLabelForValue(value as number);
-                return '';
-              },
+              // callback: function (value, index, ticks) {
+              //   if (index === 0) return this.getLabelForValue(value as number);
+              //   if (index === ticks.length - 1)
+              //     return this.getLabelForValue(value as number);
+              //   return "";
+              // },
             },
             border: { display: false },
           },
