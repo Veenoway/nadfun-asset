@@ -1,7 +1,9 @@
 "use client";
 import { useModalStore } from "@/store/useModalStore";
+import { InfiniteTokenSelector } from "./components/InfiniteTokenSelector";
 import { MultiLineChart } from "./components/MultiLineChart";
 import { TokenModal } from "./components/TokenModal";
+import { assets } from "./constant";
 
 const lineConfigs = [
   {
@@ -20,6 +22,7 @@ export default function Home() {
   console.log(toggle, isOpen);
   return (
     <main className="max-w-screen-2xl mx-auto p-8 w-full">
+      <InfiniteTokenSelector tokens={assets} />
       <section
         className="grid grid-cols-12 grid-flow-dense gap-4 min-h-screen
                    [grid-auto-rows:160px] md:[grid-auto-rows:220px] xl:[grid-auto-rows:260px]"
