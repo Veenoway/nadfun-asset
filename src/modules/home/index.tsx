@@ -1,6 +1,6 @@
-import { MultiLineChart } from './components/MultiLineChart'
-import { MultiLineDataPoint } from './types'
-import { TokenSwapDrawer } from './components/Drawer'
+import { MultiLineChart } from './components/MultiLineChart';
+import { MultiLineDataPoint } from './types';
+import { TokenSwapDrawer } from './components/Drawer';
 
 const sampleData = [
   {
@@ -53,7 +53,7 @@ const sampleData = [
     buyAmount: 0,
     sellAmount: 0,
   },
-]
+];
 
 const lineConfigs = [
   {
@@ -84,7 +84,7 @@ const lineConfigs = [
     fill: false,
     tension: 0.3,
   },
-]
+];
 export default function Home() {
   return (
     <main className="max-w-screen-2xl mx-auto p-8 w-full">
@@ -97,9 +97,7 @@ export default function Home() {
             <div className="flex items-center justify-between w-full">
               <h2 className="text-2xl font-bold">Chart</h2>
               <div className="flex items-center gap-2">
-                <button className="bg-white text-black px-4 py-2 rounded-md">
-                  Select tokens
-                </button>
+                <button className="bg-white text-black px-4 py-2 rounded-md">Select tokens</button>
               </div>
             </div>
             <MultiLineChart
@@ -136,5 +134,5 @@ export default function Home() {
         </div>
       </section>
     </main>
-  )
+  );
 }
