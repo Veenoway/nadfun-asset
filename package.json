@@ -21,6 +21,7 @@
     "react-icons": "^5.4.0",
     "react-toastify": "^11.0.5",
     "tailwind-merge": "^3.0.1",
+    "vaul": "^1.1.2",
     "wagmi": "^2.14.11",
     "zustand": "^5.0.8"
   },
