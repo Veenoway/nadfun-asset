@@ -12,10 +12,10 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        primary: "#6263A6",
-        secondary: "#120621",
-        terciary: "#1E1330",
-        borderColor: "#251936",
+        primary: "#1E1E1E",
+        secondary: "#252525",
+        terciary: "#333333",
+        borderColor: "#303030",
         brandColor: "#241F6F",
       },
       height: {

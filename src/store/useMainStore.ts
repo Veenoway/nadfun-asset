@@ -1,11 +1,15 @@
 import { create } from "zustand";
 
 type CounterState = {
-  test: string;
-  setTest: (test: string) => void;
+  assets: Asset[];
+  setAssets: (assets: Asset[]) => void;
+  selectedAsset: Asset | null;
+  setSelectedAsset: (asset: Asset | null) => void;
 };
 
 export const useMainStore = create<CounterState>()((set) => ({
-  test: "",
-  setTest: (test: string) => set({ test }),
+  assets: [],
+  setAssets: (assets: Asset[]) => set({ assets }),
+  selectedAsset: null,
+  setSelectedAsset: (asset: Asset | null) => set({ selectedAsset }),
 }));
