@@ -1,7 +1,10 @@
 "use client";
 import { useModalStore } from "@/store/useModalStore";
+import { useState } from "react";
+import { InfiniteTokenSelector } from "./components/InfiniteTokenSelector";
 import { MultiLineChart } from "./components/MultiLineChart";
 import { TokenModal } from "./components/TokenModal";
+import { assets } from "./constant";
 
 const lineConfigs = [
   {
@@ -17,9 +20,11 @@ const lineConfigs = [
 
 export default function Home() {
   const { toggle, isOpen } = useModalStore();
+  const [showTxPoints, setShowTxPoints] = useState(false);
   console.log(toggle, isOpen);
   return (
     <main className="max-w-screen-2xl mx-auto p-8 w-full">
+      <InfiniteTokenSelector tokens={assets} />
       <section
         className="grid grid-cols-12 grid-flow-dense gap-4 min-h-screen
                    [grid-auto-rows:160px] md:[grid-auto-rows:220px] xl:[grid-auto-rows:260px]"
@@ -30,14 +35,25 @@ export default function Home() {
               <h2 className="text-2xl font-bold">Chart</h2>
               <div className="flex items-center gap-2">
                 <button
-                  className="bg-brandColor text-white px-4 py-2 rounded-md"
+                  className="bg-terciary hover:bg-terciary/80 text-white px-4 py-2 rounded-md"
                   onClick={toggle}
                 >
                   Select tokens
                 </button>
+                <button
+                  className="bg-terciary hover:bg-terciary/80 text-white px-4 py-2 rounded-md"
+                  onClick={() => setShowTxPoints(!showTxPoints)}
+                >
+                  Show Tx
+                </button>
               </div>
             </div>
-            <MultiLineChart lines={lineConfigs} height="440px" data={[]} />
+            <MultiLineChart
+              lines={lineConfigs}
+              height="440px"
+              data={[]}
+              showTransactionPoints={showTxPoints}
+            />
           </div>
         </div>
         <TokenModal />
