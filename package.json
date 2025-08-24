@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "npx prettier --write .",
+    "format:check": "npx prettier --check ."
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.6",
@@ -22,6 +24,7 @@
     "react-icons": "^5.4.0",
     "react-toastify": "^11.0.5",
     "tailwind-merge": "^3.0.1",
+    "vaul": "^1.1.2",
     "wagmi": "^2.14.11",
     "zustand": "^5.0.8"
   },

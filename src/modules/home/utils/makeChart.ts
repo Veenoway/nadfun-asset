@@ -1,4 +1,4 @@
-import { ChartPoint } from "../types";
+import { ChartPoint } from '../types';
 
 /**
  * Génère 10 points avec variations up/down.
@@ -6,12 +6,8 @@ import { ChartPoint } from "../types";
  * @param seedInit   Graine pseudo-aléatoire
  * @param volatilityPct Amplitude max/jour (ex: 0.05 = ±5%)
  */
-export const makeChart = (
-  startPrice: number,
-  seedInit = 1,
-  volatilityPct = 0.05
-): ChartPoint[] => {
-  const dateStr = (i: number) => `2024-01-${String(i + 1).padStart(2, "0")}`;
+export const makeChart = (startPrice: number, seedInit = 1, volatilityPct = 0.05): ChartPoint[] => {
+  const dateStr = (i: number) => `2024-01-${String(i + 1).padStart(2, '0')}`;
 
   let price = startPrice;
   let seed = seedInit;

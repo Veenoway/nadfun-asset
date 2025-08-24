@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useAccount, useDisconnect, useSwitchChain } from "wagmi";
-import { WalletModal } from "./connect-modal";
+import { useEffect, useState } from 'react';
+import { useAccount, useDisconnect, useSwitchChain } from 'wagmi';
+import { WalletModal } from './connect-modal';
 
 export function WalletConnection() {
   // const { open } = useAppKit();
@@ -19,10 +19,10 @@ export function WalletConnection() {
   }, [address]);
 
   const getDisplayText = () => {
-    if (isConnecting || isInitialLoading) return "Loading...";
+    if (isConnecting || isInitialLoading) return 'Loading...';
     return `${address?.slice(0, 6)}...${address?.slice(-4)}`;
   };
-  console.log("chainID;", chainId);
+  console.log('chainID;', chainId);
   const isWrongNetwork = chainId !== 10143;
 
   const handleSwitchNetwork = async () => {
@@ -31,7 +31,7 @@ export function WalletConnection() {
         chainId: 10143,
       });
     } catch (err) {
-      console.error("Failed to switch network:", err);
+      console.error('Failed to switch network:', err);
     }
   };
 
@@ -39,7 +39,7 @@ export function WalletConnection() {
     try {
       disconnect();
     } catch (err) {
-      console.error("Failed to disconnect:", err);
+      console.error('Failed to disconnect:', err);
     }
   };
 
@@ -66,7 +66,7 @@ export function WalletConnection() {
             className={`bg-brandColor
              flex items-center rounded uppercase mx-auto w-fit h-[40px] sm:h-[50px] px-2.5 sm:px-5 py-5
              text-lg sm:text-xl text-white font-medium transition-all duration-300 ease-in-out
-             ${isConnecting ? "opacity-50 cursor-not-allowed" : ""}`}
+             ${isConnecting ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             Connect Wallet
           </button>
@@ -79,7 +79,7 @@ export function WalletConnection() {
             className={`bg-brandColor
                 flex items-center rounded uppercase mx-auto w-fit h-[40px] sm:h-[50px] px-2.5 sm:px-5 py-5
                 text-lg sm:text-xl text-white font-semibold transition-all duration-300 ease-in-out
-                ${isConnecting || isInitialLoading ? "animate-pulse" : ""}`}
+                ${isConnecting || isInitialLoading ? 'animate-pulse' : ''}`}
           >
             {getDisplayText()}
           </button>

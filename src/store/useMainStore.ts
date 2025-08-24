@@ -1,6 +1,6 @@
-import { assets } from "@/modules/home/constant";
-import { Asset } from "@/modules/home/types";
-import { create } from "zustand";
+import { assets } from '@/modules/home/constant';
+import { Asset } from '@/modules/home/types';
+import { create } from 'zustand';
 
 type CounterState = {
   tokens: Asset[];

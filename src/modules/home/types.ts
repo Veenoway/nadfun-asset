@@ -29,7 +29,7 @@ export interface MultiLineChartProps {
   enableAnimation?: boolean;
   animationDuration?: number;
   enableSecondaryYAxis?: boolean;
-  secondaryYAxisPosition?: "left" | "right";
+  secondaryYAxisPosition?: 'left' | 'right';
 }
 
 export interface MultiLineDataPoint {
@@ -54,9 +54,9 @@ export interface LineConfig {
 
 export interface AxisConfig {
   y: {
-    type: "linear";
+    type: 'linear';
     display: boolean;
-    position: "left" | "right";
+    position: 'left' | 'right';
     grid?: {
       display?: boolean;
       color?: string;
@@ -74,9 +74,9 @@ export interface AxisConfig {
     };
   };
   y1?: {
-    type: "linear";
+    type: 'linear';
     display: boolean;
-    position: "left" | "right";
+    position: 'left' | 'right';
     grid?: {
       display: boolean;
       color?: string;

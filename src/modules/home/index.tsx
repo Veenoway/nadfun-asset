@@ -1,19 +1,20 @@
-"use client";
-import { useModalStore } from "@/store/useModalStore";
-import { useState } from "react";
-import { InfiniteTokenSelector } from "./components/InfiniteTokenSelector";
-import { MultiLineChart } from "./components/MultiLineChart";
-import { TokenModal } from "./components/TokenModal";
-import { assets } from "./constant";
+'use client';
+import { useModalStore } from '@/store/useModalStore';
+import { useState } from 'react';
+import { InfiniteTokenSelector } from './components/InfiniteTokenSelector';
+import { MultiLineChart } from './components/MultiLineChart';
+import { TokenModal } from './components/TokenModal';
+import { assets } from './constant';
+import { TokenSwapDrawer } from './components/TokenSwapDrawer';
 
 const lineConfigs = [
   {
-    key: "price",
-    label: "Price",
-    lineColor: "rgb(14, 203, 129)",
-    fillColor: "rgba(14, 203, 129, 0.2)",
+    key: 'price',
+    label: 'Price',
+    lineColor: 'rgb(14, 203, 129)',
+    fillColor: 'rgba(14, 203, 129, 0.2)',
     lineWidth: 3,
-    yAxisID: "y",
+    yAxisID: 'y',
     fill: false,
   },
 ];
@@ -60,7 +61,11 @@ export default function Home() {
         <div className="col-span-12 lg:col-span-4 row-span-3 bg-primary p-6 rounded-lg h-full border border-borderColor">
           <div className="flex h-full min-h-0 flex-col gap-4 overflow-auto">
             <div className="flex flex-col gap-2">
-              <h2 className="text-2xl font-bold">Something</h2>
+              <TokenSwapDrawer>
+                <button className="w-full bg-brandColor text-white px-4 py-3 rounded-md hover:bg-brandColor/80 transition-colors">
+                  Open Swap Interface
+                </button>
+              </TokenSwapDrawer>
             </div>
           </div>
         </div>

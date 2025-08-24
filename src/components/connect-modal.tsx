@@ -1,13 +1,13 @@
-"use client";
+'use client';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/lib/shadcn/modal";
-import { FC, PropsWithChildren } from "react";
-import { useConnect } from "wagmi";
+} from '@/lib/shadcn/modal';
+import { FC, PropsWithChildren } from 'react';
+import { useConnect } from 'wagmi';
 
 export const WalletModal: FC<
   PropsWithChildren & { open: boolean; setOpen: (value: boolean) => void }
@@ -21,16 +21,14 @@ export const WalletModal: FC<
         className="sm:max-w-[600px] text-white px-10 py-8 rounded-xl bg-brandColor"
       >
         <DialogHeader>
-          <DialogTitle className="text-3xl mb-3 text-white uppercase">
-            Connect Wallet
-          </DialogTitle>
+          <DialogTitle className="text-3xl mb-3 text-white uppercase">Connect Wallet</DialogTitle>
         </DialogHeader>
         <div className="flex flex-wrap gap-5 w-full">
           {connectors?.map((connector, i) => (
             <button
               key={i}
               style={{
-                width: "calc(50% - 10px)",
+                width: 'calc(50% - 10px)',
               }}
               onClick={() => {
                 connect({ connector });
@@ -38,11 +36,7 @@ export const WalletModal: FC<
               }}
               className=" bg-[#292e81] hover:bg-[#3439a7]/70 transition-all duration-300 ease-in-out flex items-center justify-center rounded h-[66px] px-2 font-thin text-xl"
             >
-              <img
-                src={connector.icon}
-                alt={connector.name}
-                className="w-6 h-6 mr-3"
-              />
+              <img src={connector.icon} alt={connector.name} className="w-6 h-6 mr-3" />
               {connector.name}
             </button>
           ))}

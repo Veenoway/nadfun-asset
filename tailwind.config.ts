@@ -1,49 +1,49 @@
-import type { Config } from "tailwindcss";
+import type { Config } from 'tailwindcss';
 
 export default {
   content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
   ],
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-        primary: "#1E1E1E",
-        secondary: "#252525",
-        terciary: "#333333",
-        borderColor: "#303030",
-        brandColor: "#241F6F",
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
+        primary: '#1E1E1E',
+        secondary: '#252525',
+        terciary: '#333333',
+        borderColor: '#303030',
+        brandColor: '#241F6F',
       },
       height: {
-        "calc-header-screen": "calc(100vh - 90px)",
+        'calc-header-screen': 'calc(100vh - 90px)',
       },
       keyframes: {
-        "pulse-once": {
-          "0%, 100%": { transform: "scale(1)" },
-          "50%": { transform: "scale(1.05)" },
+        'pulse-once': {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.05)' },
         },
         reveal: {
-          "0%": { opacity: "0", filter: "blur(10px)" },
-          "100%": { opacity: "1", filter: "blur(0)" },
+          '0%': { opacity: '0', filter: 'blur(10px)' },
+          '100%': { opacity: '1', filter: 'blur(0)' },
         },
         fadeIn: {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
         },
         fadeOut: {
-          "0%": { opacity: "0.6" },
-          "100%": { opacity: "0" },
+          '0%': { opacity: '0.6' },
+          '100%': { opacity: '0' },
         },
       },
       animation: {
-        "pulse-once": "pulse-once 2s ease-in-out",
-        reveal: "reveal 1s ease-in-out",
-        fadeIn: "fadeIn 0.5s ease-in-out",
-        fadeOut: "fadeOut 5s ease-in-out forwards",
+        'pulse-once': 'pulse-once 2s ease-in-out',
+        reveal: 'reveal 1s ease-in-out',
+        fadeIn: 'fadeIn 0.5s ease-in-out',
+        fadeOut: 'fadeOut 5s ease-in-out forwards',
       },
     },
   },

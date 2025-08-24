@@ -1,8 +1,8 @@
-"use client";
-import type { ReactNode } from "react";
-import { create } from "zustand";
+'use client';
+import type { ReactNode } from 'react';
+import { create } from 'zustand';
 
-export type ModalSize = "sm" | "md" | "lg" | "xl" | "full";
+export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
 
 type TokenModalPayload = {
   title?: ReactNode;

@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
-import { useMainStore } from "@/store/useMainStore";
-import Chart from "chart.js/auto";
-import { useEffect, useMemo, useRef } from "react";
-import { AxisConfig, MultiLineChartProps } from "../types";
+'use client';
+import { useMainStore } from '@/store/useMainStore';
+import Chart from 'chart.js/auto';
+import { useEffect, useMemo, useRef } from 'react';
+import { AxisConfig, MultiLineChartProps } from '../types';
 
 type TxPoint = {
   buyPoint: boolean;
@@ -13,49 +13,49 @@ type TxPoint = {
 };
 
 const PALETTE = [
-  "#0ECB81",
-  "#EA3943",
-  "#3B82F6",
-  "#F59E0B",
-  "#A855F7",
-  "#14B8A6",
-  "#EF4444",
-  "#22C55E",
-  "#8B5CF6",
-  "#10B981",
-  "#F97316",
-  "#06B6D4",
-  "#E11D48",
-  "#84CC16",
-  "#6366F1",
+  '#0ECB81',
+  '#EA3943',
+  '#3B82F6',
+  '#F59E0B',
+  '#A855F7',
+  '#14B8A6',
+  '#EF4444',
+  '#22C55E',
+  '#8B5CF6',
+  '#10B981',
+  '#F97316',
+  '#06B6D4',
+  '#E11D48',
+  '#84CC16',
+  '#6366F1',
 ];
 
 export const MultiLineChart = ({
-  height = "177px",
+  height = '177px',
   pointRadius = 0,
   pointHoverRadius = 4,
   pointBorderWidth = 2,
-  pointBorderColor = "#FFFFFF60",
+  pointBorderColor = '#FFFFFF60',
   gridDisplay = true,
-  tooltipBackground = "rgba(30, 30, 30, 0.8)",
-  tooltipTitleColor = "#FFFFFF",
-  tooltipBodyColor = "#FFFFFF",
-  tooltipBorderColor = "#836EF9",
+  tooltipBackground = 'rgba(30, 30, 30, 0.8)',
+  tooltipTitleColor = '#FFFFFF',
+  tooltipBodyColor = '#FFFFFF',
+  tooltipBorderColor = '#836EF9',
   tooltipBorderWidth = 1,
   tooltipDisplayColors = true,
   tooltipPadding = 10,
   tooltipCornerRadius = 10,
-  gridColor = "rgba(255, 255, 255, 0.06)",
-  axisColor = "#FFFFFF60",
+  gridColor = 'rgba(255, 255, 255, 0.06)',
+  axisColor = '#FFFFFF60',
   axisFontSize = 10,
-  axisFontFamily = "Arial",
+  axisFontFamily = 'Arial',
   axisPadding = 5,
   enableAnimation = true,
   animationDuration = 750,
   enableSecondaryYAxis = false,
-  secondaryYAxisPosition = "right",
-  buyPointColor = "#00ff88",
-  sellPointColor = "#ff4444",
+  secondaryYAxisPosition = 'right',
+  buyPointColor = '#00ff88',
+  sellPointColor = '#ff4444',
   buyPointRadius = 8,
   sellPointRadius = 8,
   showTransactionPoints = true,
@@ -101,7 +101,7 @@ export const MultiLineChart = ({
         label: asset.symbol ?? asset.name,
         data: values,
         borderColor: color,
-        backgroundColor: color + "33",
+        backgroundColor: color + '33',
         borderWidth: 2,
         tension: 0.35,
         fill: false,
@@ -110,27 +110,20 @@ export const MultiLineChart = ({
         pointHoverBackgroundColor: color,
         pointHoverBorderColor: pointBorderColor,
         pointHoverBorderWidth: pointBorderWidth,
-        yAxisID: "y" as const,
+        yAxisID: 'y' as const,
         // on stocke les points de transaction pour le plugin
         __tx: tx,
       } as any;
     });
-  }, [
-    selectedTokens,
-    labels,
-    pointRadius,
-    pointHoverRadius,
-    pointBorderColor,
-    pointBorderWidth,
-  ]);
+  }, [selectedTokens, labels, pointRadius, pointHoverRadius, pointBorderColor, pointBorderWidth]);
 
   useEffect(() => {
     if (chartInstance.current) chartInstance.current.destroy();
-    const ctx = chartRef.current?.getContext("2d");
+    const ctx = chartRef.current?.getContext('2d');
     if (!ctx) return;
 
     const transactionPlugin = {
-      id: "transactionPoints",
+      id: 'transactionPoints',
       afterDatasetsDraw: (chart: Chart) => {
         const { ctx } = chart;
         chart.data.datasets.forEach((ds: any, dsIndex: number) => {
@@ -143,7 +136,7 @@ export const MultiLineChart = ({
             const tx = txArr[i]!;
             if (!tx.buyPoint && !tx.sellPoint) return;
 
-            const { x, y } = elem.getProps(["x", "y"], true);
+            const { x, y } = elem.getProps(['x', 'y'], true);
             const isBuy = !!tx.buyPoint;
             const r = isBuy ? buyPointRadius : sellPointRadius;
 
@@ -152,15 +145,15 @@ export const MultiLineChart = ({
             ctx.arc(x, y, r, 0, 2 * Math.PI);
             ctx.fillStyle = isBuy ? buyPointColor : sellPointColor;
             ctx.fill();
-            ctx.strokeStyle = "#FFFFFF";
+            ctx.strokeStyle = '#FFFFFF';
             ctx.lineWidth = 2;
             ctx.stroke();
 
-            ctx.fillStyle = "#FFFFFF";
+            ctx.fillStyle = '#FFFFFF';
             ctx.font = `bold ${Math.round(r)}px Arial`;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(isBuy ? "B" : "S", x, y);
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(isBuy ? 'B' : 'S', x, y);
             ctx.restore();
           });
         });
@@ -169,9 +162,9 @@ export const MultiLineChart = ({
 
     const yAxesConfig: AxisConfig = {
       y: {
-        type: "linear",
+        type: 'linear',
         display: true,
-        position: "left",
+        position: 'left',
         grid: { display: gridDisplay, color: gridColor },
         ticks: {
           color: axisColor,
@@ -183,7 +176,7 @@ export const MultiLineChart = ({
 
     if (enableSecondaryYAxis) {
       yAxesConfig.y1 = {
-        type: "linear",
+        type: 'linear',
         display: true,
         position: secondaryYAxisPosition,
         grid: { display: gridDisplay, color: gridColor },
@@ -196,7 +189,7 @@ export const MultiLineChart = ({
     }
 
     chartInstance.current = new Chart(ctx, {
-      type: "line",
+      type: 'line',
       data: {
         labels: labels.map((d) => new Date(d).toLocaleDateString()),
         datasets,
@@ -208,7 +201,7 @@ export const MultiLineChart = ({
         plugins: {
           legend: {
             display: true,
-            position: "top",
+            position: 'top',
             labels: {
               color: axisColor,
               font: { size: axisFontSize, family: axisFontFamily },
@@ -228,13 +221,9 @@ export const MultiLineChart = ({
             boxWidth: 0,
             callbacks: {
               label: (context) => {
-                let label = context.dataset.label
-                  ? `${context.dataset.label}: $`
-                  : "$";
+                let label = context.dataset.label ? `${context.dataset.label}: $` : '$';
                 if (context.parsed.y !== null) {
-                  label += new Intl.NumberFormat("en-US").format(
-                    context.parsed.y
-                  );
+                  label += new Intl.NumberFormat('en-US').format(context.parsed.y);
                 }
                 return label;
               },
@@ -243,9 +232,9 @@ export const MultiLineChart = ({
                 const txArr = ds.__tx as (TxPoint | null)[];
                 const tx = txArr?.[context.dataIndex];
                 const out: string[] = [];
-                if (tx?.buyPoint) out.push(`Buy: ${tx.buyAmount ?? "N/A"}`);
-                if (tx?.sellPoint) out.push(`Sell: ${tx.sellAmount ?? "N/A"}`);
-                if (out.length === 0) return "";
+                if (tx?.buyPoint) out.push(`Buy: ${tx.buyAmount ?? 'N/A'}`);
+                if (tx?.sellPoint) out.push(`Sell: ${tx.sellAmount ?? 'N/A'}`);
+                if (out.length === 0) return '';
                 return out;
               },
             },
@@ -271,7 +260,7 @@ export const MultiLineChart = ({
           },
           ...yAxesConfig,
         },
-        interaction: { intersect: false, mode: "index" },
+        interaction: { intersect: false, mode: 'index' },
       },
       plugins: showTransactionPoints ? [transactionPlugin as any] : [],
     });
@@ -307,8 +296,8 @@ export const MultiLineChart = ({
   ]);
 
   return (
-    <div style={{ height, width: "100%" }}>
-      <canvas ref={chartRef} style={{ height: "100%", width: "100%" }} />
+    <div style={{ height, width: '100%' }}>
+      <canvas ref={chartRef} style={{ height: '100%', width: '100%' }} />
     </div>
   );
 };
