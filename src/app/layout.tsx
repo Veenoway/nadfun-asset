@@ -12,8 +12,8 @@ const poppins = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: "Tentacle Of Beholdak | Mint",
-  description: "Mint your Tentacle Of Beholdak NFTs on Monad testnet.",
+  title: "Nad.fun",
+  description: "Nad.fun",
 };
 
 export default async function RootLayout({
