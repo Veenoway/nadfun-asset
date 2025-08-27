@@ -11,8 +11,9 @@ import {
 } from '@/lib/shadcn/drawer';
 import { cn } from '@/utils/cn';
 import { useTokensByCreationTime, useMultipleTokenPrices } from '@/hooks/useTokens';
+import { useBondingCurve } from '@/hooks/useBondingCurve';
 import { useAccount, useBalance } from 'wagmi';
-import { formatEther } from 'viem';
+import { formatEther, parseEther } from 'viem';
 
 interface TokenSwapDrawerProps {
   children: React.ReactNode;
@@ -36,6 +37,21 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
   const tokenAddresses = selectedTokens.map((token) => token.token_address || '').filter(Boolean);
   const { data: tokenPrices } = useMultipleTokenPrices(tokenAddresses);
 
+  // Get the first token for bonding curve operations
+  const firstToken = selectedTokens[0];
+
+  // Use bonding curve hook for the first token
+  const {
+    isLoading: isBondingLoading,
+    error: bondingError,
+    isBuySuccess,
+    isListed,
+    isLocked,
+    amountOut,
+    buyToken,
+    balance: bondingBalance,
+  } = useBondingCurve(firstToken?.token_address, fromAmount);
+
   // Calculate available balance
   const availableBalance = balance ? Number(formatEther(balance.value)) : 0;
   const inputAmount = Number(fromAmount) || 0;
@@ -50,11 +66,16 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
     const monPerToken = monToSpend / selectedTokens.length;
 
     const tokenAmounts: Record<string, string> = {};
-    selectedTokens.forEach((token) => {
-      // Use actual token price if available, otherwise fallback to mock price
-      const tokenPrice = Number(tokenPrices?.[token.token_address || '']);
-      const tokenAmount = monPerToken / tokenPrice;
-      tokenAmounts[token.symbol] = tokenAmount.toFixed(6);
+    selectedTokens.forEach((token, index) => {
+      if (index === 0 && firstToken && amountOut) {
+        // Use actual bonding curve amount for first token
+        tokenAmounts[token.symbol] = amountOut;
+      } else {
+        // Use actual token price if available, otherwise fallback to mock price
+        const tokenPrice = Number(tokenPrices?.[token.token_address || '']);
+        const tokenAmount = monPerToken / tokenPrice;
+        tokenAmounts[token.symbol] = tokenAmount.toFixed(6);
+      }
     });
 
     return tokenAmounts;
@@ -62,12 +83,23 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
 
   const tokenAmounts = calculateTokenAmounts();
 
+  // Handle successful buy
+  useEffect(() => {
+    if (isBuySuccess) {
+      console.log('Token bought successfully!');
+      setIsOpen(false);
+      setFromAmount('');
+    }
+  }, [isBuySuccess]);
+
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
-  const handleSwap = () => {
-    const tokenSymbols = selectedTokens.map((token) => token.symbol).join(', ');
-    const action = mode === 'buy' ? 'Buying' : 'Selling';
+  const handleSwap = async () => {
+    if (!firstToken?.token_address) {
+      console.error('No token selected');
+      return;
+    }
 
     // Validate input
     if (!fromAmount || Number(fromAmount) <= 0) {
@@ -81,11 +113,14 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
       return;
     }
 
-    console.log({ selectedTokens });
+    // Check if token is available for bonding curve
+    if (isListed || isLocked) {
+      console.error('Token is listed or locked, cannot use bonding curve');
+      return;
+    }
 
-    console.log(`${action} ${tokenSymbols} with ${fromAmount} MON`);
-    console.log('Token amounts:', tokenAmounts);
-    setIsOpen(false);
+    // Execute the buy
+    await buyToken(fromAmount, parseEther(amountOut!));
   };
 
   // Check if we have at least one token selected
@@ -143,6 +178,23 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
                     </div>
                   </div>
                 </div>
+
+                {/* Bonding Curve Status for First Token */}
+                {firstToken && (
+                  <div className="p-4 bg-secondary rounded-lg border border-borderColor">
+                    <h4 className="text-sm font-medium text-white/60 mb-2">Bonding Curve Status</h4>
+                    <div className="space-y-1 text-sm text-white/80">
+                      <div>Token: {firstToken.symbol}</div>
+                      <div>
+                        Address: {firstToken.token_address?.slice(0, 10)}...
+                        {firstToken.token_address?.slice(-8)}
+                      </div>
+                      <div>Listed: {isListed ? 'Yes' : 'No'}</div>
+                      <div>Locked: {isLocked ? 'Yes' : 'No'}</div>
+                      {amountOut && <div>Expected tokens: {amountOut}</div>}
+                    </div>
+                  </div>
+                )}
 
                 {/* MON Amount Input */}
                 <div className="space-y-3">
@@ -229,6 +281,13 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
                   </div>
                 ))}
 
+                {/* Error Display */}
+                {bondingError && (
+                  <div className="p-4 bg-red-100 border border-red-300 rounded-lg">
+                    <p className="text-red-700 text-sm">{bondingError}</p>
+                  </div>
+                )}
+
                 {/* Exchange Rate Section - Only show if we have 2+ tokens */}
                 {selectedTokens.length >= 2 && (
                   <div className="space-y-3 p-4 bg-secondary rounded-lg border border-borderColor">
@@ -273,10 +332,12 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
             <div className="p-6 border-t border-borderColor bg-white">
               <button
                 onClick={handleSwap}
-                disabled={!isValidAmount}
+                disabled={
+                  !isValidAmount || isBondingLoading || (firstToken && (isListed || isLocked))
+                }
                 className="w-full bg-brandColor hover:bg-brandColor/80 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-4 text-lg font-bold rounded-lg transition-colors"
               >
-                {mode === 'buy' ? 'BUY TOKENS' : 'SELL TOKENS'}
+                {isBondingLoading ? 'PROCESSING...' : mode === 'buy' ? 'BUY TOKENS' : 'SELL TOKENS'}
               </button>
             </div>
           </>
