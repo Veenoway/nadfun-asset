@@ -3,6 +3,14 @@ const nextConfig = {
   images: {
     domains: ['gateway.pinata.cloud'],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/nadfun/:path*',
+        destination: 'https://testnet-v3-api.nad.fun/:path*',
+      },
+    ];
+  },
   webpack: (config: any) => {
     config.module.rules.push({
       test: /\.(ttf|woff|woff2|eot)$/,

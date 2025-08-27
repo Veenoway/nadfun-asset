@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { InfiniteTokenSelector } from './components/InfiniteTokenSelector';
 import { MultiLineChart } from './components/MultiLineChart';
 import { TokenModal } from './components/TokenModal';
-import { assets } from './constant';
 import { TokenSwapDrawer } from './components/TokenSwapDrawer';
+import { useTokensByCreationTime } from '@/hooks/useTokens';
+import { makeChart } from './utils/makeChart';
 
 const lineConfigs = [
   {
@@ -23,9 +24,22 @@ export default function Home() {
   const { toggle, isOpen } = useModalStore();
   const [showTxPoints, setShowTxPoints] = useState(false);
   console.log(toggle, isOpen);
+
+  const { data: tokens, isLoading, error } = useTokensByCreationTime(1, 10);
+
+  const assets = tokens?.order_token.map((token) => ({
+    logo: token.token_info.image_uri,
+    symbol: token.token_info.symbol,
+    name: token.token_info.name,
+
+    //price and chart are not real
+    price: Number(token.token_info.market_cap),
+    chart: makeChart(Number(token.token_info.market_cap), 11),
+  }));
+
   return (
-    <main className="max-w-screen-2xl mx-auto p-8 w-full">
-      <InfiniteTokenSelector tokens={assets} />
+    <main className="max-w-screen-2xl mx-auto p-8 w-full pt-[100px]">
+      <InfiniteTokenSelector tokens={assets || []} />
       <section
         className="grid grid-cols-12 grid-flow-dense gap-4 min-h-screen
                    [grid-auto-rows:160px] md:[grid-auto-rows:220px] xl:[grid-auto-rows:260px]"

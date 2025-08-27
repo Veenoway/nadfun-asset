@@ -66,7 +66,7 @@ export function InfiniteTokenSelector({ tokens, speed = 80, className, onCompare
       className={cn(
         'relative w-full overflow-hidden select-none mb-4 group',
         'border border-white/10 rounded-lg bg-primary/20',
-        className,
+        className
       )}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -78,7 +78,7 @@ export function InfiniteTokenSelector({ tokens, speed = 80, className, onCompare
         className={cn(
           'flex w-max will-change-transform',
           !reduceMotion && 'animate-[marquee_var(--duration)_linear_infinite]',
-          paused && '[animation-play-state:paused]',
+          paused && '[animation-play-state:paused]'
         )}
         style={{ animationDirection: 'reverse' }}
       >
@@ -119,9 +119,9 @@ const TokenItem = ({ token, onCompare }: TokenItemProps) => {
       type="button"
       className={cn(
         'group/item flex items-center gap-3 px-3 py-2 m-2 rounded-md',
-        'bg-primary border border-white/10 hover:border-white/20',
+        'bg-white border border-white/10 hover:border-white/20',
         'shadow-sm hover:shadow transition-colors',
-        selected && 'bg-white/30',
+        selected && 'bg-white/30'
       )}
       title={token.name}
       onClick={() => {
