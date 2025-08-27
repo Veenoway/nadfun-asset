@@ -1,6 +1,6 @@
 'use client';
 import { useModalStore } from '@/store/useModalStore';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { InfiniteTokenSelector } from './components/InfiniteTokenSelector';
 import { MultiLineChart } from './components/MultiLineChart';
 import { TokenModal } from './components/TokenModal';
@@ -23,7 +23,6 @@ const lineConfigs = [
 export default function Home() {
   const { toggle, isOpen } = useModalStore();
   const [showTxPoints, setShowTxPoints] = useState(false);
-  console.log(toggle, isOpen);
 
   const { data: tokens, isLoading, error } = useTokensByCreationTime(1, 10);
 
@@ -31,6 +30,7 @@ export default function Home() {
     logo: token.token_info.image_uri,
     symbol: token.token_info.symbol,
     name: token.token_info.name,
+    token_address: token.token_info.token_id,
 
     //price and chart are not real
     price: Number(token.token_info.market_cap),

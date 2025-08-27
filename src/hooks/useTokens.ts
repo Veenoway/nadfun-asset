@@ -1,4 +1,4 @@
-import { OrderTokenResponse } from '@/modules/home/types';
+import { MarketDataResponse, OrderTokenResponse } from '@/modules/home/types';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import axios from 'axios';
 
@@ -36,11 +36,11 @@ export const useTokensByMarketCap = (page: number = 1, limit: number = 10) => {
 };
 
 // Fetch token info
-export const useTokenInfo = (tokenAddress: string) => {
+export const useTokenInfo = (tokenAddress: string): UseQueryResult<MarketDataResponse> => {
   return useQuery({
     queryKey: ['token', 'info', tokenAddress],
     queryFn: async () => {
-      const response = await axios.get(`/api/nadfun/token/${tokenAddress}`);
+      const response = await axios.get(`/api/nadfun/trade/market/${tokenAddress}`);
       return response.data;
     },
     enabled: !!tokenAddress,
@@ -83,5 +83,32 @@ export const useAccountPositions = (
     },
     enabled: !!accountAddress,
     staleTime: 30 * 1000,
+  });
+};
+
+// Fetch multiple token prices at once
+export const useMultipleTokenPrices = (tokenAddresses: string[]) => {
+  return useQuery({
+    queryKey: ['tokens', 'prices', tokenAddresses],
+    queryFn: async () => {
+      const pricePromises = tokenAddresses.map(async (address) => {
+        if (!address) return { address, price: null };
+        try {
+          const response = await axios.get(`/api/nadfun/trade/market/${address}`);
+          return { address, price: response.data.price };
+        } catch (error) {
+          console.error(`Failed to fetch price for token ${address}:`, error);
+          return { address, price: null };
+        }
+      });
+
+      const results = await Promise.all(pricePromises);
+      return results.reduce((acc, { address, price }) => {
+        acc[address] = price;
+        return acc;
+      }, {} as Record<string, string | null>);
+    },
+    enabled: tokenAddresses.length > 0 && tokenAddresses.some((addr) => !!addr),
+    staleTime: 2 * 60 * 1000,
   });
 };
