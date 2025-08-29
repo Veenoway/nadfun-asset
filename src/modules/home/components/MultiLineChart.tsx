@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
-import { useMainStore } from '@/store/useMainStore';
+import { useModalStore } from '@/store/useModalStore';
 import Chart from 'chart.js/auto';
 import { useEffect, useMemo, useRef } from 'react';
-import { AxisConfig, MultiLineChartProps } from '../types';
+import { MultiLineChartProps } from '../types';
 
 type TxPoint = {
   buyPoint: boolean;
@@ -31,6 +31,8 @@ const PALETTE = [
 ];
 
 export const MultiLineChart = ({
+  data,
+  dataType = 'price',
   height = '177px',
   pointRadius = 0,
   pointHoverRadius = 4,
@@ -62,44 +64,54 @@ export const MultiLineChart = ({
 }: MultiLineChartProps) => {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
-  const { selectedTokens } = useMainStore();
+  const { isOpen } = useModalStore();
 
-  // 1) Labels = union triée de toutes les dates présentes
+  console.log(data);
+
+  const tokenChart = data?.map((entry) => entry.chart);
+  const tokenInfo = data?.map((entry) => entry.token);
+
   const labels = useMemo(() => {
-    const set = new Set<string>();
-    selectedTokens?.forEach((a) => a.chart?.forEach((p) => set.add(p.date)));
-    return Array.from(set).sort((a, b) => +new Date(a) - +new Date(b));
-  }, []);
+    if (!tokenChart?.length) return [];
 
-  // 2) Datasets = 1 par asset, data alignée sur 'labels'
+    const allDates = new Set<string>();
+
+    // Parcourir tous les tokens
+    tokenChart.forEach((chartQuery, index) => {
+      if (chartQuery?.data?.length) {
+        chartQuery.data.forEach((point) => {
+          allDates.add(point.time);
+        });
+      }
+    });
+
+    const sortedDates = Array.from(allDates).sort(
+      (a, b) => new Date(a).getTime() - new Date(b).getTime()
+    );
+
+    console.log(
+      '📅 Generated labels from',
+      tokenChart.length,
+      'tokens:',
+      sortedDates,
+      '... total:',
+      sortedDates.length
+    );
+    return sortedDates;
+  }, [tokenChart && !isOpen]);
+
+  console.log('labels', labels);
+
+  console.log('tokenCharttokenCharttokenChart', tokenChart, tokenInfo);
   const datasets = useMemo(() => {
-    if (!selectedTokens?.length) return [];
+    if (!tokenChart?.length) return [];
 
-    return selectedTokens.map((asset, idx) => {
-      const byDate = new Map(asset.chart.map((p) => [p.date, p]));
-      const values: (number | null)[] = [];
-      const tx: (TxPoint | null)[] = [];
-
-      labels.forEach((d) => {
-        const p = byDate.get(d);
-        if (p) {
-          values.push(p.price);
-          tx.push({
-            buyPoint: !!p.buyPoint,
-            sellPoint: !!p.sellPoint,
-            buyAmount: p.buyAmount,
-            sellAmount: p.sellAmount,
-          });
-        } else {
-          values.push(null); // gap si date absente
-          tx.push(null);
-        }
-      });
-
+    return tokenChart.map((asset, idx) => {
       const color = PALETTE[idx % PALETTE.length];
+      const info = tokenInfo[idx];
       return {
-        label: asset.symbol ?? asset.name,
-        data: values,
+        label: info?.data?.symbol ?? asset?.data?.name,
+        data: asset?.data.map((t) => (dataType === 'price' ? t.close : t.volume)),
         borderColor: color,
         backgroundColor: color + '33',
         borderWidth: 2,
@@ -112,10 +124,18 @@ export const MultiLineChart = ({
         pointHoverBorderWidth: pointBorderWidth,
         yAxisID: 'y' as const,
         // on stocke les points de transaction pour le plugin
-        __tx: tx,
+        // __tx: tx,
       } as any;
     });
-  }, [selectedTokens, labels, pointRadius, pointHoverRadius, pointBorderColor, pointBorderWidth]);
+  }, [
+    labels,
+    pointRadius,
+    pointHoverRadius,
+    pointBorderColor,
+    pointBorderWidth,
+    dataType,
+    data && !isOpen,
+  ]);
 
   useEffect(() => {
     if (chartInstance.current) chartInstance.current.destroy();
@@ -160,33 +180,35 @@ export const MultiLineChart = ({
       },
     };
 
-    const yAxesConfig: AxisConfig = {
+    const yAxesConfig: any = {
       y: {
         type: 'linear',
         display: true,
         position: 'left',
+        afterDataLimits: function (scale: any) {
+          const padding = (scale.max - scale.min) * 0.1; // 10% de padding
+          scale.min = scale.min - padding;
+          scale.max = scale.max + padding;
+        },
         grid: { display: gridDisplay, color: gridColor },
         ticks: {
           color: axisColor,
           font: { size: axisFontSize, family: axisFontFamily },
+          callback: function (value: any) {
+            // Formatter les très petits nombres
+            if (Math.abs(value) < 0.000001) {
+              return parseFloat(value.toFixed(12));
+            } else if (Math.abs(value) < 0.01) {
+              return parseFloat(value.toFixed(8));
+            } else {
+              return new Intl.NumberFormat('en-US').format(value);
+            }
+          },
         },
         border: { display: false },
+        beginAtZero: false,
       },
     };
-
-    if (enableSecondaryYAxis) {
-      yAxesConfig.y1 = {
-        type: 'linear',
-        display: true,
-        position: secondaryYAxisPosition,
-        grid: { display: gridDisplay, color: gridColor },
-        ticks: {
-          color: axisColor,
-          font: { size: axisFontSize, family: axisFontFamily },
-        },
-        border: { display: false },
-      };
-    }
 
     chartInstance.current = new Chart(ctx, {
       type: 'line',
@@ -194,6 +216,7 @@ export const MultiLineChart = ({
         labels: labels.map((d) => new Date(d).toLocaleDateString()),
         datasets,
       },
+
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -249,14 +272,9 @@ export const MultiLineChart = ({
               padding: axisPadding,
               maxRotation: 0,
               minRotation: 0,
-              // callback: function (value, index, ticks) {
-              //   if (index === 0) return this.getLabelForValue(value as number);
-              //   if (index === ticks.length - 1)
-              //     return this.getLabelForValue(value as number);
-              //   return "";
-              // },
             },
             border: { display: false },
+            beginAtZero: false,
           },
           ...yAxesConfig,
         },
@@ -267,9 +285,8 @@ export const MultiLineChart = ({
 
     return () => chartInstance.current?.destroy();
   }, [
-    selectedTokens,
     labels,
-    datasets,
+    datasets && !isOpen,
     gridDisplay,
     gridColor,
     axisColor,
@@ -293,6 +310,7 @@ export const MultiLineChart = ({
     buyPointRadius,
     sellPointRadius,
     showTransactionPoints,
+    dataType,
   ]);
 
   return (

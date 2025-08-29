@@ -30,6 +30,7 @@ export interface MultiLineChartProps {
   animationDuration?: number;
   enableSecondaryYAxis?: boolean;
   secondaryYAxisPosition?: 'left' | 'right';
+  dataType?: DataType;
 }
 
 export interface MultiLineDataPoint {
@@ -112,3 +113,5 @@ export type Asset = {
   price: number;
   chart: ChartPoint[];
 };
+
+export type DataType = 'price' | 'volume';

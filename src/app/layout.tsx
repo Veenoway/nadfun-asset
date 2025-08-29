@@ -1,4 +1,5 @@
 import { Header } from '@/layouts/header';
+import QueryProvider from '@/lib/react-query';
 import ContextProvider from '@/lib/wagmi/provider';
 import type { Metadata } from 'next';
 import { Bebas_Neue } from 'next/font/google';
@@ -27,8 +28,10 @@ export default async function RootLayout({
       <body className={`${poppins} `}>
         {/* <Analytics /> */}
         <ContextProvider cookies={cookies}>
-          <Header />
-          {children}
+          <QueryProvider>
+            <Header />
+            {children}
+          </QueryProvider>
         </ContextProvider>
       </body>
     </html>

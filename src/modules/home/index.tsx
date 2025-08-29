@@ -1,11 +1,14 @@
 'use client';
+import { useMultiTokenChart } from '@/hooks/useTradeChart';
+import { useMainStore } from '@/store/useMainStore';
 import { useModalStore } from '@/store/useModalStore';
 import { useState } from 'react';
 import { InfiniteTokenSelector } from './components/InfiniteTokenSelector';
 import { MultiLineChart } from './components/MultiLineChart';
 import { TokenModal } from './components/TokenModal';
-import { assets } from './constant';
 import { TokenSwapDrawer } from './components/TokenSwapDrawer';
+import { assets } from './constant';
+import { DataType } from './types';
 
 const lineConfigs = [
   {
@@ -20,9 +23,15 @@ const lineConfigs = [
 ];
 
 export default function Home() {
-  const { toggle, isOpen } = useModalStore();
+  const { toggle } = useModalStore();
+  const [dataType, setDataType] = useState<DataType>('price');
   const [showTxPoints, setShowTxPoints] = useState(false);
-  console.log(toggle, isOpen);
+  const { selectedTokens } = useMainStore();
+
+  const tokens = useMultiTokenChart(
+    selectedTokens.filter((token) => token.address).map((token) => token.address) as string[]
+  );
+
   return (
     <main className="max-w-screen-2xl mx-auto p-8 w-full">
       <InfiniteTokenSelector tokens={assets} />
@@ -47,13 +56,26 @@ export default function Home() {
                 >
                   Show Tx
                 </button>
+                <button
+                  className="bg-terciary hover:bg-terciary/80 text-white px-4 py-2 rounded-md"
+                  onClick={() => setDataType('price')}
+                >
+                  Price
+                </button>
+                <button
+                  className="bg-terciary hover:bg-terciary/80 text-white px-4 py-2 rounded-md"
+                  onClick={() => setDataType('volume')}
+                >
+                  Volume
+                </button>
               </div>
             </div>
             <MultiLineChart
               lines={lineConfigs}
               height="440px"
-              data={[]}
+              data={tokens}
               showTransactionPoints={showTxPoints}
+              dataType={dataType}
             />
           </div>
         </div>
