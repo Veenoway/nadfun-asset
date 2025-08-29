@@ -1,6 +1,6 @@
 // CHART TYPES
 export interface MultiLineChartProps {
-  data: MultiLineDataPoint[];
+  data: AddressRow[];
   lines: LineConfig[];
   height?: string;
   pointRadius?: number;
@@ -31,15 +31,6 @@ export interface MultiLineChartProps {
   enableSecondaryYAxis?: boolean;
   secondaryYAxisPosition?: 'left' | 'right';
   dataType?: DataType;
-}
-
-export interface MultiLineDataPoint {
-  date: string;
-  buyPoint?: boolean;
-  sellPoint?: boolean;
-  buyAmount?: number;
-  sellAmount?: number;
-  [key: string]: number | string | boolean | undefined;
 }
 
 export interface LineConfig {
@@ -96,22 +87,34 @@ export interface AxisConfig {
   };
 }
 
-// ASSET TYPES
-export type ChartPoint = {
-  date: string; // "YYYY-MM-DD"
-  price: number;
-  buyPoint: boolean;
-  sellPoint: boolean;
-  buyAmount: number;
-  sellAmount: number;
-};
-
 export type Asset = {
   logo: string;
   symbol: string;
   name: string;
   price: number;
   chart: ChartPoint[];
+  address: string;
 };
 
 export type DataType = 'price' | 'volume';
+
+export type TokenInfo = {
+  image_uri: string;
+  name: string;
+  symbol: string;
+  token_id: string;
+};
+
+export type ChartPoint = {
+  data: { t: number; o: number; h: number; l: number; c: number; v?: number }[];
+};
+
+export type AddressRow<TChart = ChartPoint> = {
+  address: `0x${string}`;
+  token: TokenInfo;
+  chart: TChart[];
+  isLoading: boolean;
+  error: Error | null;
+};
+
+export type AddressRows<TChart = ChartPoint> = AddressRow<TChart>[];

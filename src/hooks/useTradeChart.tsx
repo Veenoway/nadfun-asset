@@ -1,22 +1,39 @@
+import { TokenInfo } from '@/modules/home/types';
 import { toPoints } from '@/modules/home/utils/number';
-import { useQueries, useQuery } from '@tanstack/react-query';
+import { useQueries, useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { useState } from 'react';
 
 type TokenAddress = string;
 
+type CandlePoint = {
+  time: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume?: number;
+};
+
 type MultiTokenData = {
   address: string;
-  token: any;
-  chart: any;
-  isLoading: boolean;
-  error: any;
+  token: {
+    data: TokenInfo;
+    isLoading: boolean;
+    error: unknown;
+    refetch: () => Promise<unknown>;
+  };
+  chart: {
+    data: CandlePoint[];
+    isLoading: boolean;
+    error: unknown;
+  };
 };
 
 export function useMultiTokenChart(addresses: TokenAddress[], pollingMs = 4000) {
   const chartQueries = useQueries({
     queries: addresses.map((address) => ({
       queryKey: ['chart', address],
-      queryFn: ({ signal }) => getChart({ address }, { signal }),
+      queryFn: ({ signal }: { signal: AbortSignal }) => getChart({ address }, { signal }),
       refetchInterval: pollingMs,
       refetchIntervalInBackground: true,
       staleTime: pollingMs,
@@ -27,18 +44,20 @@ export function useMultiTokenChart(addresses: TokenAddress[], pollingMs = 4000) 
   const tokenQueries = useQueries({
     queries: addresses.map((address) => ({
       queryKey: ['token', address],
-      queryFn: ({ signal }) => getToken(address, { signal }),
+      queryFn: ({ signal }: { signal: AbortSignal }) => getToken(address, { signal }),
       staleTime: 5 * 60 * 1000,
       refetchOnWindowFocus: false,
       refetchInterval: false,
       enabled: !!address,
-    })),
+    })) as unknown as UseQueryOptions<unknown, Error, unknown, readonly unknown[]>[],
   });
 
   const tokensData: MultiTokenData[] = addresses.map((address, index) => {
     const chartQuery = chartQueries[index];
     const tokenQuery = tokenQueries[index];
-    const tokenInfo = tokenQuery?.data?.tokens?.tokens?.[0]?.token_info;
+    const tokenInfo = (
+      tokenQuery as unknown as { data: { tokens: { tokens: { token_info: TokenInfo }[] } } }
+    )?.data?.tokens?.tokens?.[0]?.token_info;
 
     return {
       address,
@@ -59,8 +78,6 @@ export function useMultiTokenChart(addresses: TokenAddress[], pollingMs = 4000) 
     };
   });
 
-  console.log('tokensData', tokensData);
-
   return tokensData;
 }
 
@@ -68,10 +85,10 @@ export function useTokenInfo(address: string) {
   return useQuery({
     queryKey: ['token', address],
     queryFn: ({ signal }) => getToken(address, { signal }),
-    staleTime: 5 * 60 * 1000, // Cache 5 minutes
+    staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
-    refetchInterval: false, // Pas de polling
-    enabled: !!address, // Ne query que si l'address existe
+    refetchInterval: false,
+    enabled: !!address,
   });
 }
 
@@ -88,7 +105,7 @@ export function useChartInfo(address: string, pollingMs = 4000) {
 
 export function useTokenManager() {
   const [selectedAddresses, setSelectedAddresses] = useState<TokenAddress[]>([
-    '0x76bb094B5B0C646c4A0e96c5e40239aD62d069FB', // Token par défaut
+    '0x76bb094B5B0C646c4A0e96c5e40239aD62d069FB',
   ]);
 
   const addToken = (address: TokenAddress) => {

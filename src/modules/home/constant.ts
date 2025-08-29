@@ -80,7 +80,7 @@ export const assets: Asset[] = [
     name: 'IDK',
     price: 720,
     chart: makeChart(690, 11),
-    address: '0x76bb094B5B0C646c4A0e96c5e40239aD62d069FB',
+    address: '0x7F8180Dc5aACD8370022e726A77583C1d2fD9052',
   },
   {
     logo: cmc(6636),
@@ -112,6 +112,7 @@ export const assets: Asset[] = [
     name: 'Shiba Inu',
     price: 0.02,
     chart: makeChart(0.019, 15),
+    address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE',
   },
   {
     logo: cmc(5805),
@@ -119,6 +120,7 @@ export const assets: Asset[] = [
     name: 'Avalanche',
     price: 3600,
     chart: makeChart(3500, 16),
+    address: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
   },
   {
     logo: cmc(1975),
@@ -126,6 +128,7 @@ export const assets: Asset[] = [
     name: 'Chainlink',
     price: 1450,
     chart: makeChart(1400, 17),
+    address: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
   },
   {
     logo: cmc(7083),
@@ -133,6 +136,7 @@ export const assets: Asset[] = [
     name: 'Uniswap',
     price: 780,
     chart: makeChart(750, 18),
+    address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
   },
   {
     logo: cmc(512),
@@ -140,6 +144,7 @@ export const assets: Asset[] = [
     name: 'Stellar',
     price: 12,
     chart: makeChart(11, 19),
+    address: '0x98033011b7F0868501692C7736416b73b07F5854',
   },
   {
     logo: cmc(3794),
@@ -147,5 +152,6 @@ export const assets: Asset[] = [
     name: 'Cosmos',
     price: 920,
     chart: makeChart(900, 20),
+    address: '0x09b10A85e4866F577d4d671E437Ed400dFd2C660',
   },
 ];

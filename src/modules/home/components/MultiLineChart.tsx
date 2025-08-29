@@ -3,7 +3,7 @@
 import { useModalStore } from '@/store/useModalStore';
 import Chart from 'chart.js/auto';
 import { useEffect, useMemo, useRef } from 'react';
-import { MultiLineChartProps } from '../types';
+import { AddressRow, MultiLineChartProps } from '../types';
 
 type TxPoint = {
   buyPoint: boolean;
@@ -29,6 +29,26 @@ const PALETTE = [
   '#84CC16',
   '#6366F1',
 ];
+
+export type ChartPoint = {
+  time: string; // ex. "2025-08-29T10:00:00Z"
+  close: number;
+  volume: number;
+};
+
+export type TokenInfo = {
+  token_id: `0x${string}`;
+  name: string;
+  symbol: string;
+  image_uri: string;
+};
+
+export type QueryResource<T> = {
+  data?: T;
+  isLoading: boolean;
+  error: unknown | null;
+  refetch?: () => Promise<unknown>;
+};
 
 export const MultiLineChart = ({
   data,
@@ -66,20 +86,19 @@ export const MultiLineChart = ({
   const chartInstance = useRef<Chart | null>(null);
   const { isOpen } = useModalStore();
 
-  console.log(data);
+  console.log('data', data);
 
-  const tokenChart = data?.map((entry) => entry.chart);
-  const tokenInfo = data?.map((entry) => entry.token);
+  const tokenChart = data?.map((entry: AddressRow) => entry.chart);
+  const tokenInfo = data?.map((entry: AddressRow) => entry.token);
 
   const labels = useMemo(() => {
     if (!tokenChart?.length) return [];
 
     const allDates = new Set<string>();
 
-    // Parcourir tous les tokens
-    tokenChart.forEach((chartQuery, index) => {
-      if (chartQuery?.data?.length) {
-        chartQuery.data.forEach((point) => {
+    tokenChart.forEach((chartQuery) => {
+      if ((chartQuery as unknown as { data: ChartPoint[] })?.data?.length) {
+        (chartQuery as unknown as { data: ChartPoint[] })?.data.forEach((point) => {
           allDates.add(point.time);
         });
       }
@@ -89,29 +108,20 @@ export const MultiLineChart = ({
       (a, b) => new Date(a).getTime() - new Date(b).getTime()
     );
 
-    console.log(
-      '📅 Generated labels from',
-      tokenChart.length,
-      'tokens:',
-      sortedDates,
-      '... total:',
-      sortedDates.length
-    );
     return sortedDates;
   }, [tokenChart && !isOpen]);
 
-  console.log('labels', labels);
-
-  console.log('tokenCharttokenCharttokenChart', tokenChart, tokenInfo);
   const datasets = useMemo(() => {
     if (!tokenChart?.length) return [];
 
-    return tokenChart.map((asset, idx) => {
+    return tokenChart.map((asset, idx: number) => {
       const color = PALETTE[idx % PALETTE.length];
       const info = tokenInfo[idx];
       return {
-        label: info?.data?.symbol ?? asset?.data?.name,
-        data: asset?.data.map((t) => (dataType === 'price' ? t.close : t.volume)),
+        label: (info as TokenInfo)?.symbol ?? (info as TokenInfo)?.name,
+        data: (asset as unknown as { asset: { data: ChartPoint[] } })?.asset?.data?.map((t) =>
+          dataType === 'price' ? t.close : t.volume
+        ),
         borderColor: color,
         backgroundColor: color + '33',
         borderWidth: 2,
@@ -123,8 +133,6 @@ export const MultiLineChart = ({
         pointHoverBorderColor: pointBorderColor,
         pointHoverBorderWidth: pointBorderWidth,
         yAxisID: 'y' as const,
-        // on stocke les points de transaction pour le plugin
-        // __tx: tx,
       } as any;
     });
   }, [
@@ -186,7 +194,7 @@ export const MultiLineChart = ({
         display: true,
         position: 'left',
         afterDataLimits: function (scale: any) {
-          const padding = (scale.max - scale.min) * 0.1; // 10% de padding
+          const padding = (scale.max - scale.min) * 0.1;
           scale.min = scale.min - padding;
           scale.max = scale.max + padding;
         },
@@ -195,7 +203,6 @@ export const MultiLineChart = ({
           color: axisColor,
           font: { size: axisFontSize, family: axisFontFamily },
           callback: function (value: any) {
-            // Formatter les très petits nombres
             if (Math.abs(value) < 0.000001) {
               return parseFloat(value.toFixed(12));
             } else if (Math.abs(value) < 0.01) {
