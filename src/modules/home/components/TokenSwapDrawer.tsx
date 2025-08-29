@@ -10,8 +10,8 @@ import {
   DrawerTrigger,
 } from '@/lib/shadcn/drawer';
 import { cn } from '@/utils/cn';
-import { useTokensByCreationTime, useMultipleTokenPrices } from '@/hooks/useTokens';
-import { useBondingCurve } from '@/hooks/useBondingCurve';
+import { useMultipleTokenPrices } from '@/hooks/useTokens';
+import { useNadFunTrading } from '@/hooks/useNadFunTrading';
 import { useAccount, useBalance } from 'wagmi';
 import { formatEther, parseEther } from 'viem';
 
@@ -20,44 +20,50 @@ interface TokenSwapDrawerProps {
 }
 
 export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [mode, setMode] = useState<'buy' | 'sell'>('buy');
-  const [fromAmount, setFromAmount] = useState('');
-
-  // Get selected tokens from the store
-  const { selectedTokens } = useMainStore();
-
-  // Get wallet info
   const { address } = useAccount();
   const { data: balance } = useBalance({ address });
 
-  const { data: tokens, isLoading, error } = useTokensByCreationTime(1, 10);
+  const [isOpen, setIsOpen] = useState(false);
+  const [mode, setMode] = useState<'buy' | 'sell'>('buy');
+  const [fromAmount, setFromAmount] = useState('');
+  const [tokenAmount, setTokenAmount] = useState('');
+
+  const { selectedTokens } = useMainStore();
+
+  const hasUserTokens = selectedTokens.some((token) => 'balance' in token);
 
   // Get token prices for selected tokens
   const tokenAddresses = selectedTokens.map((token) => token.token_address || '').filter(Boolean);
   const { data: tokenPrices } = useMultipleTokenPrices(tokenAddresses);
 
-  // Get the first token for bonding curve operations
   const firstToken = selectedTokens[0];
 
-  // Use bonding curve hook for the first token
+  const userToken = selectedTokens.find((token) => 'balance' in token) as any;
+  const userTokenBalance = userToken?.balance ? Number(formatEther(BigInt(userToken.balance))) : 0;
+
+  const tradingAmount = mode === 'buy' ? fromAmount : tokenAmount;
   const {
-    isLoading: isBondingLoading,
-    error: bondingError,
-    isBuySuccess,
+    isLoading: isTradingLoading,
+    error: tradingError,
+    isSuccess: isTradeSuccess,
     isListed,
     isLocked,
-    amountOut,
     buyToken,
-    balance: bondingBalance,
-  } = useBondingCurve(firstToken?.token_address, fromAmount);
+    sellToken,
+    amountOut,
+    balance: tradingBalance,
+  } = useNadFunTrading(firstToken?.token_address, tradingAmount, mode === 'sell');
 
   // Calculate available balance
   const availableBalance = balance ? Number(formatEther(balance.value)) : 0;
   const inputAmount = Number(fromAmount) || 0;
-  const isValidAmount = inputAmount > 0 && inputAmount <= availableBalance;
+  const tokenInputAmount = Number(tokenAmount) || 0;
+  const isValidAmount =
+    mode === 'buy'
+      ? inputAmount > 0 && inputAmount <= availableBalance
+      : tokenInputAmount > 0 && tokenInputAmount <= userTokenBalance;
 
-  // Calculate token amounts based on MON spent
+  // Calculate token amounts based on MON spent (for buy mode)
   const calculateTokenAmounts = () => {
     if (!selectedTokens.length || !fromAmount || Number(fromAmount) <= 0 || !isValidAmount)
       return {};
@@ -68,13 +74,7 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
     const tokenAmounts: Record<string, string> = {};
     selectedTokens.forEach((token, index) => {
       if (index === 0 && firstToken && amountOut) {
-        // Use actual bonding curve amount for first token
         tokenAmounts[token.symbol] = amountOut;
-      } else {
-        // Use actual token price if available, otherwise fallback to mock price
-        const tokenPrice = Number(tokenPrices?.[token.token_address || '']);
-        const tokenAmount = monPerToken / tokenPrice;
-        tokenAmounts[token.symbol] = tokenAmount.toFixed(6);
       }
     });
 
@@ -83,33 +83,31 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
 
   const tokenAmounts = calculateTokenAmounts();
 
-  // Handle successful buy
+  const handlePercentageSelect = (percentage: number) => {
+    const amount = (userTokenBalance * percentage) / 100;
+    setTokenAmount(amount.toFixed(6));
+  };
+
+  // Handle successful trade
   useEffect(() => {
-    if (isBuySuccess) {
-      console.log('Token bought successfully!');
+    if (isTradeSuccess) {
+      alert('Token traded successfully!');
       setIsOpen(false);
       setFromAmount('');
+      setTokenAmount('');
     }
-  }, [isBuySuccess]);
+  }, [isTradeSuccess]);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+  // Auto-switch to sell mode when user tokens are selected
+  useEffect(() => {
+    if (hasUserTokens && selectedTokens.length > 0) {
+      setMode('sell');
+    }
+  }, [hasUserTokens, selectedTokens.length]);
 
   const handleSwap = async () => {
     if (!firstToken?.token_address) {
       console.error('No token selected');
-      return;
-    }
-
-    // Validate input
-    if (!fromAmount || Number(fromAmount) <= 0) {
-      console.error('Invalid amount');
-      return;
-    }
-
-    // Validate balance
-    if (Number(fromAmount) > availableBalance) {
-      console.error('Insufficient balance');
       return;
     }
 
@@ -119,8 +117,43 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
       return;
     }
 
-    // Execute the buy
-    await buyToken(fromAmount, parseEther(amountOut!));
+    if (mode === 'buy') {
+      if (!fromAmount || Number(fromAmount) <= 0) {
+        console.error('Invalid amount');
+        return;
+      }
+
+      if (Number(fromAmount) > availableBalance) {
+        console.error('Insufficient MON balance');
+        return;
+      }
+
+      // Execute the buy
+      await buyToken({
+        tokenAddress: firstToken.token_address,
+        amountIn: fromAmount,
+        amountOutMin: amountOut || undefined,
+      });
+    } else {
+      // Validate input
+      if (!tokenAmount || Number(tokenAmount) <= 0) {
+        console.error('Invalid token amount');
+        return;
+      }
+
+      // Validate token balance for selling
+      if (!userToken || Number(tokenAmount) > userTokenBalance) {
+        console.error('Insufficient token balance');
+        return;
+      }
+
+      // Execute the sell
+      await sellToken({
+        tokenAddress: firstToken.token_address,
+        amountIn: tokenAmount,
+        amountOutMin: amountOut || undefined,
+      });
+    }
   };
 
   // Check if we have at least one token selected
@@ -146,10 +179,8 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
 
         {hasTokens && (
           <>
-            {/* Scrollable Content Area */}
             <div className="flex-1 overflow-y-auto">
               <div className="p-6 space-y-6">
-                {/* Buy/Sell Mode Toggle */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="flex border border-borderColor rounded-md overflow-hidden bg-secondary">
@@ -179,7 +210,6 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
                   </div>
                 </div>
 
-                {/* Bonding Curve Status for First Token */}
                 {firstToken && (
                   <div className="p-4 bg-secondary rounded-lg border border-borderColor">
                     <h4 className="text-sm font-medium text-white/60 mb-2">Bonding Curve Status</h4>
@@ -191,105 +221,183 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
                       </div>
                       <div>Listed: {isListed ? 'Yes' : 'No'}</div>
                       <div>Locked: {isLocked ? 'Yes' : 'No'}</div>
-                      {amountOut && <div>Expected tokens: {amountOut}</div>}
+                      {amountOut && (
+                        <div>
+                          {mode === 'buy' ? 'Expected tokens' : 'Expected MON'}: {amountOut}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
 
-                {/* MON Amount Input */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-black/60 lowercase">
-                      {mode === 'buy' ? 'mon to spend' : 'mon to receive'}
-                    </span>
-                    <span className="text-xs text-black/40">
-                      Available: {availableBalance.toFixed(4)} MON
-                    </span>
-                  </div>
-                  <div className="border border-borderColor rounded-lg p-4 bg-secondary">
-                    <div className="flex items-center justify-between">
-                      <input
-                        type="text"
-                        value={fromAmount}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          // Allow empty string, numbers, and decimal points
-                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                            setFromAmount(value);
-                          }
-                        }}
-                        className="text-lg font-mono text-white bg-transparent outline-none flex-1"
-                        placeholder="0.0"
-                      />
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-white">MON</span>
-                      </div>
-                    </div>
-                  </div>
-                  {fromAmount && Number(fromAmount) > availableBalance && (
-                    <div className="text-xs text-red-500">Amount exceeds available balance</div>
-                  )}
-                  {fromAmount && Number(fromAmount) <= 0 && (
-                    <div className="text-xs text-red-500">Please enter a valid amount</div>
-                  )}
-                </div>
-
-                {/* Token Input Fields */}
-                {selectedTokens.map((token, index) => (
-                  <div key={token.symbol} className="space-y-3">
+                {mode === 'buy' ? (
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-black/60 lowercase">
-                        {mode === 'buy'
-                          ? `${token.symbol.toLowerCase()} to receive`
-                          : `${token.symbol.toLowerCase()} to sell`}
+                        mon to spend
                       </span>
-                      <button
-                        onClick={() => {
-                          const { setSelectedTokens } = useMainStore.getState();
-                          setSelectedTokens(
-                            selectedTokens.filter((t) => t.symbol !== token.symbol)
-                          );
-                        }}
-                        className="text-black/60 hover:text-black transition-colors p-1"
-                        title={`Remove ${token.symbol}`}
-                      >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path
-                            fillRule="evenodd"
-                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </button>
+                      <span className="text-xs text-black/40">
+                        Available: {availableBalance.toFixed(4)} MON
+                      </span>
+                    </div>
+                    <div className="border border-borderColor rounded-lg p-4 bg-secondary">
+                      <div className="flex items-center justify-between">
+                        <input
+                          type="text"
+                          value={fromAmount}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                              setFromAmount(value);
+                            }
+                          }}
+                          className="text-lg font-mono text-white bg-transparent outline-none flex-1"
+                          placeholder="0.0"
+                        />
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-white">MON</span>
+                        </div>
+                      </div>
+                    </div>
+                    {fromAmount && Number(fromAmount) > availableBalance && (
+                      <div className="text-xs text-red-500">Amount exceeds available balance</div>
+                    )}
+                    {fromAmount && Number(fromAmount) <= 0 && (
+                      <div className="text-xs text-red-500">Please enter a valid amount</div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-black/60 lowercase">
+                        {firstToken?.symbol?.toLowerCase()} to sell
+                      </span>
+                      <span className="text-xs text-black/40">
+                        Available: {userTokenBalance.toFixed(6)} {firstToken?.symbol}
+                      </span>
+                    </div>
+
+                    <div className="flex gap-2">
+                      {[25, 50, 75, 100].map((percentage) => (
+                        <button
+                          key={percentage}
+                          onClick={() => handlePercentageSelect(percentage)}
+                          className="flex-1 px-3 py-2 text-xs font-medium bg-secondary hover:bg-secondary/80 text-white/80 hover:text-white rounded-md transition-colors"
+                        >
+                          {percentage}%
+                        </button>
+                      ))}
                     </div>
 
                     <div className="border border-borderColor rounded-lg p-4 bg-secondary">
                       <div className="flex items-center justify-between">
                         <input
                           type="text"
-                          value={tokenAmounts[token.symbol] || '0.000000'}
-                          readOnly
+                          value={tokenAmount}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                              setTokenAmount(value);
+                            }
+                          }}
                           className="text-lg font-mono text-white bg-transparent outline-none flex-1"
                           placeholder="0.0"
                         />
                         <div className="flex items-center gap-2">
-                          <img src={token.logo} alt={token.name} className="w-6 h-6 rounded-full" />
-                          <span className="text-sm font-medium text-white">{token.symbol}</span>
+                          <img
+                            src={firstToken?.logo}
+                            alt={firstToken?.name}
+                            className="w-6 h-6 rounded-full"
+                          />
+                          <span className="text-sm font-medium text-white">
+                            {firstToken?.symbol}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {tokenAmount && Number(tokenAmount) > userTokenBalance && (
+                      <div className="text-xs text-red-500">Amount exceeds available balance</div>
+                    )}
+                    {tokenAmount && Number(tokenAmount) <= 0 && (
+                      <div className="text-xs text-red-500">Please enter a valid amount</div>
+                    )}
+                  </div>
+                )}
+
+                {mode === 'sell' && amountOut && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-black/60 lowercase">
+                        mon to receive
+                      </span>
+                    </div>
+                    <div className="border border-borderColor rounded-lg p-4 bg-secondary">
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-mono text-white">{amountOut}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-white">MON</span>
                         </div>
                       </div>
                     </div>
                   </div>
-                ))}
+                )}
 
-                {/* Error Display */}
-                {bondingError && (
+                {mode === 'buy' &&
+                  selectedTokens.map((token, index) => (
+                    <div key={token.symbol} className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-black/60 lowercase">
+                          {token.symbol.toLowerCase()} to receive
+                        </span>
+                        <button
+                          onClick={() => {
+                            const { setSelectedTokens } = useMainStore.getState();
+                            setSelectedTokens(
+                              selectedTokens.filter((t) => t.symbol !== token.symbol)
+                            );
+                          }}
+                          className="text-black/60 hover:text-black transition-colors p-1"
+                          title={`Remove ${token.symbol}`}
+                        >
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                              fillRule="evenodd"
+                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+
+                      <div className="border border-borderColor rounded-lg p-4 bg-secondary">
+                        <div className="flex items-center justify-between">
+                          <input
+                            type="text"
+                            value={tokenAmounts[token.symbol] || '0.000000'}
+                            readOnly
+                            className="text-lg font-mono text-white bg-transparent outline-none flex-1"
+                            placeholder="0.0"
+                          />
+                          <div className="flex items-center gap-2">
+                            <img
+                              src={token.logo}
+                              alt={token.name}
+                              className="w-6 h-6 rounded-full"
+                            />
+                            <span className="text-sm font-medium text-white">{token.symbol}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                {tradingError && (
                   <div className="p-4 bg-red-100 border border-red-300 rounded-lg">
-                    <p className="text-red-700 text-sm">{bondingError}</p>
+                    <p className="text-red-700 text-sm">{tradingError}</p>
                   </div>
                 )}
 
-                {/* Exchange Rate Section - Only show if we have 2+ tokens */}
-                {selectedTokens.length >= 2 && (
+                {mode === 'buy' && selectedTokens.length >= 2 && (
                   <div className="space-y-3 p-4 bg-secondary rounded-lg border border-borderColor">
                     <h4 className="text-sm font-medium text-white/60">Exchange Rates</h4>
                     <div className="space-y-2 text-sm">
@@ -328,16 +436,15 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
               </div>
             </div>
 
-            {/* Fixed Bottom Button */}
             <div className="p-6 border-t border-borderColor bg-white">
               <button
                 onClick={handleSwap}
                 disabled={
-                  !isValidAmount || isBondingLoading || (firstToken && (isListed || isLocked))
+                  !isValidAmount || isTradingLoading || (firstToken && (isListed || isLocked))
                 }
                 className="w-full bg-brandColor hover:bg-brandColor/80 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-4 text-lg font-bold rounded-lg transition-colors"
               >
-                {isBondingLoading ? 'PROCESSING...' : mode === 'buy' ? 'BUY TOKENS' : 'SELL TOKENS'}
+                {isTradingLoading ? 'PROCESSING...' : mode === 'buy' ? 'BUY TOKENS' : 'SELL TOKENS'}
               </button>
             </div>
           </>

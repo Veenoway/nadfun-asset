@@ -1,8 +1,14 @@
-import { MarketDataResponse, OrderTokenResponse } from '@/modules/home/types';
+import {
+  MarketDataResponse,
+  OrderTokenResponse,
+  UserTokenBalancesResponse,
+} from '@/modules/home/types';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import axios from 'axios';
 
 ///order/latest_trade
+//https://testnet-v3-api.nad.fun/profile/hold-token/0xe329ce7EcB851c09948e5F507F1a6FfA40De055B?account_id=0xe329ce7EcB851c09948e5F507F1a6FfA40De055B&page=1&limit=10
+//https://testnet-v3-api.nad.fun/profile/swap-history/0xe329ce7EcB851c09948e5F507F1a6FfA40De055B?account_id=0xe329ce7EcB851c09948e5F507F1a6FfA40De055B&page=1&limit=10
 
 // Fetch tokens by creation time
 export const useTokensByCreationTime = (
@@ -68,26 +74,6 @@ export const useTokenChart = (
   });
 };
 
-// Fetch account positions
-export const useAccountPositions = (
-  accountAddress: string,
-  positionType: 'all' | 'open' | 'close' = 'open',
-  page: number = 1,
-  limit: number = 10
-) => {
-  return useQuery({
-    queryKey: ['account', 'positions', accountAddress, positionType, page, limit],
-    queryFn: async () => {
-      const response = await axios.get(`/api/nadfun/account/position/${accountAddress}`, {
-        params: { position_type: positionType, page, limit },
-      });
-      return response.data;
-    },
-    enabled: !!accountAddress,
-    staleTime: 30 * 1000,
-  });
-};
-
 // Fetch multiple token prices at once
 export const useMultipleTokenPrices = (tokenAddresses: string[]) => {
   return useQuery({
@@ -112,5 +98,24 @@ export const useMultipleTokenPrices = (tokenAddresses: string[]) => {
     },
     enabled: tokenAddresses.length > 0 && tokenAddresses.some((addr) => !!addr),
     staleTime: 2 * 60 * 1000,
+  });
+};
+
+// Fetch user token balances
+export const useUserTokenBalances = (
+  accountAddress?: string
+): UseQueryResult<UserTokenBalancesResponse> => {
+  return useQuery({
+    queryKey: ['user', 'token-balances', accountAddress],
+    queryFn: async () => {
+      if (!accountAddress) return null;
+      const response = await axios.get(`/api/nadfun/profile/hold-token/${accountAddress}`, {
+        params: { account_id: accountAddress, page: 1, limit: 100 },
+      });
+      return response.data;
+    },
+    enabled: !!accountAddress,
+    staleTime: 30 * 1000, // Refresh every 30 seconds
+    gcTime: 5 * 60 * 1000,
   });
 };

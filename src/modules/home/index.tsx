@@ -1,12 +1,13 @@
 'use client';
 import { useModalStore } from '@/store/useModalStore';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { InfiniteTokenSelector } from './components/InfiniteTokenSelector';
 import { MultiLineChart } from './components/MultiLineChart';
 import { TokenModal } from './components/TokenModal';
 import { TokenSwapDrawer } from './components/TokenSwapDrawer';
 import { useTokensByCreationTime } from '@/hooks/useTokens';
 import { makeChart } from './utils/makeChart';
+import { TokenBalances } from './components/TokenBalances';
 
 const lineConfigs = [
   {
@@ -21,10 +22,10 @@ const lineConfigs = [
 ];
 
 export default function Home() {
-  const { toggle, isOpen } = useModalStore();
+  const { toggle } = useModalStore();
   const [showTxPoints, setShowTxPoints] = useState(false);
 
-  const { data: tokens, isLoading, error } = useTokensByCreationTime(1, 10);
+  const { data: tokens } = useTokensByCreationTime(1, 10);
 
   const assets = tokens?.order_token.map((token) => ({
     logo: token.token_info.image_uri,
@@ -72,7 +73,7 @@ export default function Home() {
           </div>
         </div>
         <TokenModal />
-        <div className="col-span-12 lg:col-span-4 row-span-3 bg-primary p-6 rounded-lg h-full border border-borderColor">
+        <div className="col-span-12 lg:col-span-4 row-span-3 bg-white/60 p-6 rounded-lg h-full border border-borderColor">
           <div className="flex h-full min-h-0 flex-col gap-4 overflow-auto">
             <div className="flex flex-col gap-2">
               <TokenSwapDrawer>
@@ -80,6 +81,7 @@ export default function Home() {
                   Open Swap Interface
                 </button>
               </TokenSwapDrawer>
+              <TokenBalances />
             </div>
           </div>
         </div>

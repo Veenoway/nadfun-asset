@@ -15,7 +15,6 @@ export const useBondingCurve = (tokenAddress?: string, amountIn?: string) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Check if token is listed on bonding curve
   const { data: isListed } = useReadContract({
     address: NADFUN_CONTRACTS.BONDING_CURVE,
     abi: BONDING_CURVE_ABI,
@@ -23,7 +22,6 @@ export const useBondingCurve = (tokenAddress?: string, amountIn?: string) => {
     args: tokenAddress ? [tokenAddress as `0x${string}`] : undefined,
   });
 
-  // Check if token is locked
   const { data: isLocked } = useReadContract({
     address: NADFUN_CONTRACTS.BONDING_CURVE,
     abi: BONDING_CURVE_ABI,
@@ -31,7 +29,6 @@ export const useBondingCurve = (tokenAddress?: string, amountIn?: string) => {
     args: tokenAddress ? [tokenAddress as `0x${string}`] : undefined,
   });
 
-  // Get amount out for buying
   const { data: amountOut } = useReadContract({
     address: NADFUN_CONTRACTS.BONDING_CURVE_ROUTER,
     abi: BONDING_CURVE_ROUTER_ABI,
@@ -42,10 +39,8 @@ export const useBondingCurve = (tokenAddress?: string, amountIn?: string) => {
         : undefined,
   });
 
-  // Write contract for buying
   const { data: buyHash, writeContract: buyTokens, isPending: isBuyPending } = useWriteContract();
 
-  // Wait for transaction
   const { isLoading: isConfirming, isSuccess: isBuySuccess } = useWaitForTransactionReceipt({
     hash: buyHash,
   });
@@ -64,15 +59,7 @@ export const useBondingCurve = (tokenAddress?: string, amountIn?: string) => {
       try {
         const amountInWei = parseEther(amountIn);
         const amountOutMinWei = amountOutMin;
-        const deadline = BigInt(Math.floor(Date.now() / 1000) + 300); // 5 minutes from now
-
-        console.log('Buying token via bonding curve:', {
-          token: tokenAddress,
-          amountIn: amountInWei,
-          amountOutMin: amountOutMinWei,
-          to: address,
-          deadline,
-        });
+        const deadline = BigInt(Math.floor(Date.now() / 1000) + 300);
 
         buyTokens({
           address: NADFUN_CONTRACTS.BONDING_CURVE_ROUTER,
@@ -86,7 +73,7 @@ export const useBondingCurve = (tokenAddress?: string, amountIn?: string) => {
               deadline,
             },
           ],
-          value: amountInWei, // Send MON with the transaction
+          value: amountInWei,
         });
       } catch (err) {
         console.error('Error buying token:', err);
@@ -99,18 +86,13 @@ export const useBondingCurve = (tokenAddress?: string, amountIn?: string) => {
   );
 
   return {
-    // State
     isLoading: isLoading || isBuyPending || isConfirming,
     error,
     isBuySuccess,
     isListed,
     isLocked,
     amountOut: amountOut ? formatEther(amountOut) : null,
-
-    // Functions
     buyToken,
-
-    // Data
     balance: balance ? Number(formatEther(balance.value)) : 0,
   };
 };

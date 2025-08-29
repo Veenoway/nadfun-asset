@@ -145,6 +145,21 @@ export interface OrderTokenResponse {
   total_count: number;
 }
 
+export interface UserTokenBalancesResponse {
+  tokens: [
+    {
+      token_info: {
+        token_id: string;
+        name: string;
+        symbol: string;
+        image_uri: string;
+      };
+      balance: string;
+    }
+  ];
+  total_count: number;
+}
+
 export interface MarketDataResponse {
   market_type: string;
   token_id: string;
