@@ -12,6 +12,6 @@ type CounterState = {
 export const useMainStore = create<CounterState>()((set) => ({
   tokens: assets,
   setTokens: (tokens: Asset[]) => set({ tokens }),
-  selectedTokens: [assets[0]],
+  selectedTokens: [],
   setSelectedTokens: (selectedTokens: Asset[]) => set({ selectedTokens }),
 }));
