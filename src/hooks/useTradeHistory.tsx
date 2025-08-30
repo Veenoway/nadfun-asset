@@ -49,6 +49,8 @@ async function getTradesForAddress({
   const items = json.swaps ?? [];
   const total = json.total_count;
 
+  console.log('items', items, json);
+
   return { items: items.map((it) => ({ ...it, _address: address })), total };
 }
 
@@ -98,6 +100,7 @@ export function useTradeHistoryMany(
           )
         )
       );
+      console.log('resulttt', results);
       const merged: Trade[] = dedupeById(results.flatMap((r) => r.items)).sort(sortByTimeDesc);
       return merged;
     },

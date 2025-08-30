@@ -26,7 +26,6 @@ export default async function RootLayout({
   return (
     <html lang="en-US">
       <body className={`${poppins} `}>
-        {/* <Analytics /> */}
         <ContextProvider cookies={cookies}>
           <QueryProvider>
             <Header />

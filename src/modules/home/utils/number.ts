@@ -105,8 +105,8 @@ function shiftDecimalStr(s: string, shift: number) {
 }
 
 function formatDecimalFRCut(s: string, maxFrac: number) {
-  const intPart = s.split('.')[0];
-  let fracPart = s.split('.')[1];
+  const intPart = s.split('.')[0] || '0';
+  let fracPart = s.split('.')[1] || '';
   if (maxFrac >= 0) fracPart = fracPart.slice(0, maxFrac);
   fracPart = fracPart.replace(/0+$/, '');
   const intFmt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');

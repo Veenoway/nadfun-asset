@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
+import { useMainStore } from '@/store/useMainStore';
 import { useModalStore } from '@/store/useModalStore';
 import Chart from 'chart.js/auto';
 import { useEffect, useMemo, useRef } from 'react';
-import { AddressRow, MultiLineChartProps } from '../types';
+import { MultiLineChartProps } from '../types';
 
 type TxPoint = {
   buyPoint: boolean;
@@ -29,26 +30,6 @@ const PALETTE = [
   '#84CC16',
   '#6366F1',
 ];
-
-export type ChartPoint = {
-  time: string; // ex. "2025-08-29T10:00:00Z"
-  close: number;
-  volume: number;
-};
-
-export type TokenInfo = {
-  token_id: `0x${string}`;
-  name: string;
-  symbol: string;
-  image_uri: string;
-};
-
-export type QueryResource<T> = {
-  data?: T;
-  isLoading: boolean;
-  error: unknown | null;
-  refetch?: () => Promise<unknown>;
-};
 
 export const MultiLineChart = ({
   data,
@@ -83,13 +64,14 @@ export const MultiLineChart = ({
   showTransactionPoints = true,
 }: MultiLineChartProps) => {
   const chartRef = useRef<HTMLCanvasElement>(null);
+  const { selectedTokens } = useMainStore();
   const chartInstance = useRef<Chart | null>(null);
   const { isOpen } = useModalStore();
 
-  console.log('data', data);
+  console.log('MY DATERRT', data);
 
-  const tokenChart = data?.map((entry: AddressRow) => entry.chart);
-  const tokenInfo = data?.map((entry: AddressRow) => entry.token);
+  const tokenChart = data?.map((entry) => entry.chart);
+  const tokenInfo = data?.map((entry) => entry.token);
 
   const labels = useMemo(() => {
     if (!tokenChart?.length) return [];
@@ -97,8 +79,8 @@ export const MultiLineChart = ({
     const allDates = new Set<string>();
 
     tokenChart.forEach((chartQuery) => {
-      if ((chartQuery as unknown as { data: ChartPoint[] })?.data?.length) {
-        (chartQuery as unknown as { data: ChartPoint[] })?.data.forEach((point) => {
+      if (chartQuery?.data?.length) {
+        chartQuery.data.forEach((point) => {
           allDates.add(point.time);
         });
       }
@@ -109,19 +91,22 @@ export const MultiLineChart = ({
     );
 
     return sortedDates;
-  }, [tokenChart && !isOpen]);
+  }, [tokenChart && !isOpen, selectedTokens]);
 
+  console.log('labels', labels);
+
+  console.log('tokenCharttokenCharttokenChart', tokenChart, tokenInfo);
   const datasets = useMemo(() => {
     if (!tokenChart?.length) return [];
 
-    return tokenChart.map((asset, idx: number) => {
+    console.log('tokenChart', tokenChart);
+
+    return tokenChart.map((asset, idx) => {
       const color = PALETTE[idx % PALETTE.length];
       const info = tokenInfo[idx];
       return {
-        label: (info as TokenInfo)?.symbol ?? (info as TokenInfo)?.name,
-        data: (asset as unknown as { asset: { data: ChartPoint[] } })?.asset?.data?.map((t) =>
-          dataType === 'price' ? t.close : t.volume
-        ),
+        label: info?.symbol ?? asset?.name,
+        data: tokenChart?.map((t) => t.price),
         borderColor: color,
         backgroundColor: color + '33',
         borderWidth: 2,
@@ -133,6 +118,8 @@ export const MultiLineChart = ({
         pointHoverBorderColor: pointBorderColor,
         pointHoverBorderWidth: pointBorderWidth,
         yAxisID: 'y' as const,
+        // on stocke les points de transaction pour le plugin
+        // __tx: tx,
       } as any;
     });
   }, [
@@ -143,6 +130,7 @@ export const MultiLineChart = ({
     pointBorderWidth,
     dataType,
     data && !isOpen,
+    selectedTokens,
   ]);
 
   useEffect(() => {
@@ -194,7 +182,7 @@ export const MultiLineChart = ({
         display: true,
         position: 'left',
         afterDataLimits: function (scale: any) {
-          const padding = (scale.max - scale.min) * 0.1;
+          const padding = (scale.max - scale.min) * 0.1; // 10% de padding
           scale.min = scale.min - padding;
           scale.max = scale.max + padding;
         },
@@ -203,6 +191,7 @@ export const MultiLineChart = ({
           color: axisColor,
           font: { size: axisFontSize, family: axisFontFamily },
           callback: function (value: any) {
+            // Formatter les très petits nombres
             if (Math.abs(value) < 0.000001) {
               return parseFloat(value.toFixed(12));
             } else if (Math.abs(value) < 0.01) {
@@ -318,6 +307,7 @@ export const MultiLineChart = ({
     sellPointRadius,
     showTransactionPoints,
     dataType,
+    selectedTokens,
   ]);
 
   return (
