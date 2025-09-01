@@ -118,10 +118,10 @@ const TokenItem = ({ token, onCompare }: TokenItemProps) => {
     <button
       type="button"
       className={cn(
-        'group/item flex items-center gap-3 px-3 py-2 m-2 rounded-md',
-        'bg-white border border-white/10 hover:border-white/20',
+        'group/item flex items-center gap-3 px-3 py-1 my-1.5 mx-1 rounded-md',
+        'bg-terciary border border-borderColor hover:bg-quaternary',
         'shadow-sm hover:shadow transition-colors',
-        selected && 'bg-white/30'
+        selected && 'bg-quaternary'
       )}
       title={token.name}
       onClick={() => {

@@ -4,7 +4,7 @@ import { useMultiTokenChart } from '@/hooks/useTradeChart';
 import { Trade, useTradeHistoryMany } from '@/hooks/useTradeHistory';
 import { useMainStore } from '@/store/useMainStore';
 import { useModalStore } from '@/store/useModalStore';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { isAddress } from 'viem/utils';
 import { InfiniteTokenSelector } from './components/InfiniteTokenSelector';
 import { MultiLineChart } from './components/MultiLineChart';
@@ -30,7 +30,6 @@ const lineConfigs = [
 export default function Home() {
   const { toggle } = useModalStore();
   const [dataType, setDataType] = useState<DataType>('price');
-  const [showTxPoints, setShowTxPoints] = useState(false);
   const { selectedTokens } = useMainStore();
   const [tradeType, setTradeType] = useState<'ALL' | 'BUY' | 'SELL'>('ALL');
   const [direction, setDirection] = useState<'ASC' | 'DESC'>('DESC');
@@ -38,10 +37,10 @@ export default function Home() {
   const limit = 15;
   const { data: tokens } = useTokensByCreationTime(1, 10);
   const multiTokens = useMultiTokenChart(
-    selectedTokens.map((token) => token.token_address) as string[],
+    selectedTokens.map((token) => token.token_address) as string[]
   );
 
-  const { data: trades, isLoading } = useTradeHistoryMany(
+  const { data, isLoading } = useTradeHistoryMany(
     selectedTokens.map((token) => token.token_address) as string[],
     page,
     limit,
@@ -49,7 +48,8 @@ export default function Home() {
     tradeType
   );
 
-  console.log('trades', selectedTokens);
+  const total = useMemo(() => data?.total, [data]);
+  const trades = useMemo(() => data?.items, [data]);
 
   const assets = tokens?.order_token.map((token: any) => ({
     logo: token.token_info.image_uri,
@@ -68,31 +68,34 @@ export default function Home() {
         className="grid grid-cols-12 grid-flow-dense gap-4 min-h-screen
                    [grid-auto-rows:160px] md:[grid-auto-rows:220px] xl:[grid-auto-rows:260px]"
       >
-        <div className="col-span-12 lg:col-span-8 row-span-2 bg-primary p-6 rounded-lg h-full border border-borderColor">
+        <div className="col-span-12 lg:col-span-8 row-span-2 rounded-lg h-full">
           <div className="h-full min-h-0">
-            <div className="flex items-center justify-between w-full">
+            <div className="flex items-center justify-between w-full mb-4">
               <h2 className="text-2xl font-bold">Chart</h2>
               <div className="flex items-center gap-2">
                 <button
-                  className="bg-terciary hover:bg-terciary/80 text-white px-4 py-2 rounded-md"
+                  className="bg-secondary hover:bg-terciary border border-borderColor text-white px-3 py-1 rounded-md"
                   onClick={toggle}
                 >
                   Select tokens
                 </button>
+
                 <button
-                  className="bg-terciary hover:bg-terciary/80 text-white px-4 py-2 rounded-md"
-                  onClick={() => setShowTxPoints(!showTxPoints)}
-                >
-                  Show Tx
-                </button>
-                <button
-                  className="bg-terciary hover:bg-terciary/80 text-white px-4 py-2 rounded-md"
+                  className={` border border-borderColor px-3 py-1 rounded-md transition-all duration-200 ease-in-out ${
+                    dataType === 'price'
+                      ? 'bg-brandColor text-white'
+                      : 'bg-secondary hover:bg-terciary text-white/60 hover:text-white'
+                  }`}
                   onClick={() => setDataType('price')}
                 >
                   Price
                 </button>
                 <button
-                  className="bg-terciary hover:bg-terciary/80 text-white px-4 py-2 rounded-md"
+                  className={` border border-borderColor px-3 py-1 rounded-md transition-all duration-200 ease-in-out ${
+                    dataType === 'volume'
+                      ? 'bg-brandColor text-white'
+                      : 'bg-secondary hover:bg-terciary text-white/60 hover:text-white'
+                  }`}
                   onClick={() => setDataType('volume')}
                 >
                   Volume
@@ -101,15 +104,14 @@ export default function Home() {
             </div>
             <MultiLineChart
               lines={lineConfigs}
-              height="440px"
+              height="480px"
               data={multiTokens as unknown as AddressRow[]}
-              showTransactionPoints={showTxPoints}
               dataType={dataType}
             />
           </div>
         </div>
         <TokenModal tokens={assets || []} />
-        <div className="col-span-12 lg:col-span-4 row-span-3 bg-white/60 p-6 rounded-lg h-full border border-borderColor">
+        <div className="col-span-12 lg:col-span-4 row-span-3 bg-secondary p-6 rounded-lg h-full border border-borderColor">
           <div className="flex h-full min-h-0 flex-col gap-4 overflow-auto">
             <div className="flex flex-col gap-2">
               <TokenSwapDrawer>
@@ -122,41 +124,43 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="col-span-12 lg:col-span-8 row-span-3 bg-primary p-6 rounded-lg h-full border border-borderColor">
-          <h2 className="text-2xl font-bold mb-4">Trade history</h2>
+        <div className="col-span-12 lg:col-span-8 row-span-3 rounded-lg h-full">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2">
-              <button
-                className="bg-terciary hover:bg-terciary/80 text-white px-4 py-2 rounded-md"
-                onClick={() => setTradeType('ALL')}
-              >
-                All
-              </button>
-              <button
-                className="bg-terciary hover:bg-terciary/80 text-white px-4 py-2 rounded-md"
-                onClick={() => setTradeType('BUY')}
-              >
-                Buy
-              </button>
-              <button
-                className="bg-terciary hover:bg-terciary/80 text-white px-4 py-2 rounded-md"
-                onClick={() => setTradeType('SELL')}
-              >
-                Sell
-              </button>
+              {['All', 'Buy', 'Sell'].map((type) => (
+                <button
+                  key={type}
+                  className={` border border-borderColor text-sm px-3 py-1 rounded-md transition-all duration-200 ease-in-out ${
+                    tradeType === type.toUpperCase()
+                      ? 'bg-brandColor text-white'
+                      : 'bg-secondary hover:bg-terciary text-white/60 hover:text-white'
+                  }`}
+                  onClick={() => setTradeType(type.toUpperCase() as 'ALL' | 'BUY' | 'SELL')}
+                >
+                  {type}
+                </button>
+              ))}
             </div>
             <div className="flex items-center gap-2">
               <button
-                className="bg-terciary hover:bg-terciary/80 text-white px-4 py-2 rounded-md"
+                className={` border border-borderColor text-sm px-3 py-1 rounded-md transition-all duration-200 ease-in-out ${
+                  direction === 'ASC'
+                    ? 'bg-brandColor text-white'
+                    : 'bg-secondary hover:bg-terciary text-white/60 hover:text-white'
+                }`}
                 onClick={() => setDirection('ASC')}
               >
-                ASC
+                Asc
               </button>
               <button
-                className="bg-terciary hover:bg-terciary/80 text-white px-4 py-2 rounded-md"
+                className={` border border-borderColor text-sm px-3 py-1 rounded-md transition-all duration-200 ease-in-out ${
+                  direction === 'DESC'
+                    ? 'bg-brandColor text-white'
+                    : 'bg-secondary hover:bg-terciary text-white/60 hover:text-white'
+                }`}
                 onClick={() => setDirection('DESC')}
               >
-                DESC
+                Desc
               </button>
             </div>
           </div>
@@ -176,12 +180,12 @@ export default function Home() {
               {isLoading ? (
                 <tbody>
                   <tr>
-                    <td colSpan={5} className="text-center py-4">
+                    <td colSpan={5} className="text-center py-40">
                       Loading...
                     </td>
                   </tr>
                 </tbody>
-              ) : (
+              ) : trades && trades.length > 0 ? (
                 <tbody>
                   {trades?.map((trade: Trade) => {
                     const token = selectedTokens.find(
@@ -231,24 +235,35 @@ export default function Home() {
                     );
                   })}
                 </tbody>
+              ) : (
+                <tbody>
+                  <tr>
+                    <td colSpan={5} className="text-center py-40">
+                      No trades found
+                    </td>
+                  </tr>
+                </tbody>
               )}
             </table>
           </div>
-          <div className="flex justify-center mt-4 gap-2">
-            {page > 1 && (
+          <div className="flex justify-between mt-5 gap-2 items-center">
+            <div className="text-sm text-white/60">Showing {total} trades</div>
+            <div className="flex items-center gap-2">
+              {page > 1 && (
+                <button
+                  className={`border border-borderColor text-sm px-3 py-1 rounded-md transition-all duration-200 ease-in-out bg-secondary hover:bg-terciary text-white/60 hover:text-white`}
+                  onClick={() => setPage(page - 1)}
+                >
+                  Prev
+                </button>
+              )}
               <button
-                className="bg-terciary hover:bg-terciary/80 text-white px-4 py-2 rounded-md"
-                onClick={() => setPage(page - 1)}
+                className={`border border-borderColor text-sm px-3 py-1 rounded-md transition-all duration-200 ease-in-out bg-secondary hover:bg-terciary text-white/60 hover:text-white`}
+                onClick={() => setPage(page + 1)}
               >
-                Prev
+                Next
               </button>
-            )}
-            <button
-              className="bg-terciary hover:bg-terciary/80 text-white px-4 py-2 rounded-md"
-              onClick={() => setPage(page + 1)}
-            >
-              Next
-            </button>
+            </div>
           </div>
         </div>
 

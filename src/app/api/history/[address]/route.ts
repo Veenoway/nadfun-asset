@@ -14,7 +14,6 @@ export async function GET(
     params?.address
   }?${req.nextUrl.searchParams.toString()}`;
 
-  console.log('url', url);
   const upstream = await fetch(url, {
     cache: 'no-store',
     headers: {

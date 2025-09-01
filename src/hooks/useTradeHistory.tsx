@@ -49,18 +49,12 @@ async function getTradesForAddress({
   const items = json.swaps ?? [];
   const total = json.total_count;
 
-  console.log('items', items, json);
-
   return { items: items.map((it) => ({ ...it, _address: address })), total };
 }
 
-function sortByTimeDesc(a: Trade, b: Trade) {
-  const ta = a.created_at ?? 0;
-  const tb = b.created_at ?? 0;
-  return tb - ta;
-}
-
-function dedupeById(items: Trade[]) {
+function dedupeById(data: { address: string; items: Trade[]; total?: number }[]) {
+  const items = data.flatMap((d) => d.items);
+  const total = data.reduce((acc, d) => acc + (d.total ?? 0), 0);
   const seen = new Set<string | number>();
   const out: Trade[] = [];
   for (const it of items) {
@@ -70,7 +64,7 @@ function dedupeById(items: Trade[]) {
       out.push(it);
     }
   }
-  return out;
+  return { out, total };
 }
 
 export function useTradeHistoryMany(
@@ -100,9 +94,10 @@ export function useTradeHistoryMany(
           )
         )
       );
-      console.log('resulttt', results);
-      const merged: Trade[] = dedupeById(results.flatMap((r) => r.items)).sort(sortByTimeDesc);
-      return merged;
+      console.log('resultsresults', results);
+      const { out: merged, total } = dedupeById(results);
+      console.log('mergedmerged', merged);
+      return { items: merged, total };
     },
   });
 }

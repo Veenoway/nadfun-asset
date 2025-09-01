@@ -30,7 +30,7 @@ export function toPoints(r: UdfResponse): CandlePoint[] {
 
   const pts: CandlePoint[] = [];
   for (let i = 0; i < n; i++) {
-    const time = timestampToDateString(r.t[i] * 1000); // → ms
+    const time = r.t[i] * 1000;
     const open = parseFloat(r.o[i] as string);
     const high = parseFloat(r.h[i] as string);
     const low = parseFloat(r.l[i] as string);

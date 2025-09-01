@@ -1,7 +1,6 @@
 import { TokenInfo } from '@/modules/home/types';
 import { toPoints } from '@/modules/home/utils/number';
 import { useQueries, useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { useState } from 'react';
 
 type TokenAddress = string;
 
@@ -59,6 +58,8 @@ export function useMultiTokenChart(addresses: TokenAddress[], pollingMs = 4000) 
       tokenQuery as unknown as { data: { tokens: { tokens: { token_info: TokenInfo }[] } } }
     )?.data?.tokens?.tokens?.[0]?.token_info;
 
+    console.log('MY TOKEN INFO', tokenInfo, addresses, chartQuery?.data);
+
     return {
       address,
       token: {
@@ -103,39 +104,6 @@ export function useChartInfo(address: string, pollingMs = 4000) {
   });
 }
 
-export function useTokenManager() {
-  const [selectedAddresses, setSelectedAddresses] = useState<TokenAddress[]>([
-    '0x76bb094B5B0C646c4A0e96c5e40239aD62d069FB',
-  ]);
-
-  const addToken = (address: TokenAddress) => {
-    if (!selectedAddresses.includes(address) && selectedAddresses.length < 10) {
-      setSelectedAddresses((prev) => [...prev, address]);
-    }
-  };
-
-  const removeToken = (address: TokenAddress) => {
-    setSelectedAddresses((prev) => prev.filter((addr) => addr !== address));
-  };
-
-  const clearAllTokens = () => {
-    setSelectedAddresses([]);
-  };
-
-  const replaceTokens = (addresses: TokenAddress[]) => {
-    setSelectedAddresses(addresses.slice(0, 10));
-  };
-
-  return {
-    selectedAddresses,
-    addToken,
-    removeToken,
-    clearAllTokens,
-    replaceTokens,
-    hasMaxTokens: selectedAddresses.length >= 10,
-  };
-}
-
 export async function getChart(
   params: {
     address: string;
@@ -148,10 +116,10 @@ export async function getChart(
 ) {
   const qs = new URLSearchParams({
     address: params.address,
-    resolution: String(params.resolution ?? 1),
-    from: String(params.from ?? 0),
-    to: String(params.to ?? 1756096858),
-    countback: String(params.countback ?? 300),
+    resolution: '1',
+    from: '0',
+    to: String(params.to ?? Math.floor(Date.now())),
+    countback: '300',
   });
 
   const res = await fetch(`/api/chart/${params.address}?${qs.toString()}`, {
