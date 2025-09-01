@@ -1,5 +1,5 @@
 'use client';
-import { useTokensByCreationTime } from '@/hooks/useTokens';
+import { useTokensByMarketCap } from '@/hooks/useTokens';
 import { useMultiTokenChart } from '@/hooks/useTradeChart';
 import { Trade, useTradeHistoryMany } from '@/hooks/useTradeHistory';
 import { useMainStore } from '@/store/useMainStore';
@@ -34,7 +34,7 @@ export default function Home({ defaultSelectedTokens }: { defaultSelectedTokens:
   const [direction, setDirection] = useState<'ASC' | 'DESC'>('DESC');
   const [page, setPage] = useState(1);
   const limit = 15;
-  const { data: tokens } = useTokensByCreationTime(1, 10);
+  const { data: tokens } = useTokensByMarketCap(1, 20);
 
   useEffect(() => {
     setSelectedTokens(defaultSelectedTokens);
@@ -178,8 +178,8 @@ export default function Home({ defaultSelectedTokens }: { defaultSelectedTokens:
             <table className="w-full">
               <thead>
                 <tr>
-                  <th className="text-left border-y border-borderColor py-3 pl-3">Account</th>
-                  <th className="text-left border-y border-borderColor py-3">Date</th>
+                  <th className="text-left border-y border-borderColor py-3 pl-3">Date</th>
+                  <th className="text-left border-y border-borderColor py-3">User</th>
                   <th className="text-right border-y border-borderColor py-3">MON</th>
                   <th className="text-right border-y border-borderColor py-3">Token Amount</th>
                   <th className="text-right border-y border-borderColor py-3 pr-3">
@@ -204,18 +204,40 @@ export default function Home({ defaultSelectedTokens }: { defaultSelectedTokens:
                     const tokenDecimals = 18;
                     const tokenSymbol = token?.symbol ?? '';
                     return (
-                      <tr key={trade._address + trade.created_at + trade.transaction_hash}>
-                        <td className="text-left  border-b border-borderColor pl-3">
+                      <tr
+                        key={trade._address + trade.created_at + trade.transaction_hash}
+                        className="text-base"
+                      >
+                        <td className="text-left border-b border-borderColor pl-3">
                           <div className="flex items-center gap-2">
                             <div
-                              className={`w-2 h-2 rounded-full ${
-                                trade.is_buy ? 'bg-green-500' : 'bg-red-500'
+                              className={`rounded-full font-medium text-xs px-2 py-0.5 ${
+                                trade.is_buy
+                                  ? 'bg-green-600/30 text-green-500'
+                                  : 'bg-red-600/30 text-red-500'
                               }`}
-                            />
-                            {new Date(trade.created_at * 1000).toLocaleString()}
+                            >
+                              {trade.is_buy ? 'Buy' : 'Sell'}
+                            </div>
+                            <div className="gap-2 text-xs">
+                              <p className="text-white/60">
+                                {' '}
+                                {new Date(trade.created_at * 1000).toLocaleString('en-US', {
+                                  month: 'short',
+                                  day: '2-digit',
+                                })}
+                              </p>
+                              <p className="text-white text-sm">
+                                {new Date(trade.created_at * 1000).toLocaleString('en-US', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                  second: '2-digit',
+                                })}
+                              </p>
+                            </div>
                           </div>
                         </td>
-                        <td className="text-left  border-b border-borderColor pl-3">
+                        <td className="text-left border-b border-borderColor">
                           <div className="flex items-center gap-2 w-full h-full">
                             <img
                               src={trade.account_info.image_uri}
@@ -227,11 +249,19 @@ export default function Home({ defaultSelectedTokens }: { defaultSelectedTokens:
                               : trade.account_info.nickname}
                           </div>
                         </td>
-                        <td className="text-right py-2.5 border-b border-borderColor">
+                        <td
+                          className={`text-right py-2.5 border-b border-borderColor ${
+                            trade.is_buy ? 'text-green-500' : 'text-red-500'
+                          }`}
+                        >
                           {formatAmount(trade.native_amount, 18)}
                         </td>
 
-                        <td className="text-right border-b border-borderColor">
+                        <td
+                          className={`text-right border-b border-borderColor uppercase ${
+                            trade.is_buy ? 'text-green-500' : 'text-red-500'
+                          }`}
+                        >
                           {formatAmount(trade.token_amount, tokenDecimals)} {tokenSymbol}
                         </td>
 
@@ -273,6 +303,9 @@ export default function Home({ defaultSelectedTokens }: { defaultSelectedTokens:
               >
                 Next
               </button>
+              <span className="text-sm text-white/60">
+                {page} of {Math.ceil(total ?? 1 / limit)}
+              </span>
             </div>
           </div>
         </div>
