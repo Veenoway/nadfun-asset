@@ -4,14 +4,12 @@ import { useMultiTokenChart } from '@/hooks/useTradeChart';
 import { Trade, useTradeHistoryMany } from '@/hooks/useTradeHistory';
 import { useMainStore } from '@/store/useMainStore';
 import { useModalStore } from '@/store/useModalStore';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { isAddress } from 'viem/utils';
 import { InfiniteTokenSelector } from './components/InfiniteTokenSelector';
 import { MultiLineChart } from './components/MultiLineChart';
-import { TokenBalances } from './components/TokenBalances';
 import { TokenModal } from './components/TokenModal';
-import { TokenSwapDrawer } from './components/TokenSwapDrawer';
-import { AddressRow, DataType } from './types';
+import { AddressRow, Asset, DataType } from './types';
 import { makeChart } from './utils/makeChart';
 import { formatAmount } from './utils/number';
 
@@ -27,21 +25,31 @@ const lineConfigs = [
   },
 ];
 
-export default function Home() {
+export default function Home({ defaultSelectedTokens }: { defaultSelectedTokens: Asset[] }) {
   const { toggle } = useModalStore();
   const [dataType, setDataType] = useState<DataType>('price');
-  const { selectedTokens } = useMainStore();
+  const { selectedTokens, setSelectedTokens } = useMainStore();
   const [tradeType, setTradeType] = useState<'ALL' | 'BUY' | 'SELL'>('ALL');
   const [direction, setDirection] = useState<'ASC' | 'DESC'>('DESC');
   const [page, setPage] = useState(1);
   const limit = 15;
   const { data: tokens } = useTokensByCreationTime(1, 10);
-  const multiTokens = useMultiTokenChart(
-    selectedTokens.map((token) => token.token_address) as string[]
-  );
+
+  useEffect(() => {
+    setSelectedTokens(defaultSelectedTokens);
+  }, [defaultSelectedTokens]);
+
+  const selectedAddresses = useMemo(() => {
+    if (selectedTokens.length > 0) {
+      return selectedTokens?.map((token) => token.token_address);
+    }
+    return defaultSelectedTokens?.map((token) => token.token_address);
+  }, [selectedTokens]);
+
+  const multiTokens = useMultiTokenChart(selectedAddresses);
 
   const { data, isLoading } = useTradeHistoryMany(
-    selectedTokens.map((token) => token.token_address) as string[],
+    selectedAddresses,
     page,
     limit,
     direction,
@@ -51,6 +59,7 @@ export default function Home() {
   const total = useMemo(() => data?.total, [data]);
   const trades = useMemo(() => data?.items, [data]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const assets = tokens?.order_token.map((token: any) => ({
     logo: token.token_info.image_uri,
     symbol: token.token_info.symbol,
@@ -114,12 +123,12 @@ export default function Home() {
         <div className="col-span-12 lg:col-span-4 row-span-3 bg-secondary p-6 rounded-lg h-full border border-borderColor">
           <div className="flex h-full min-h-0 flex-col gap-4 overflow-auto">
             <div className="flex flex-col gap-2">
-              <TokenSwapDrawer>
+              {/* <TokenSwapDrawer>
                 <button className="w-full bg-brandColor text-white px-4 py-3 rounded-md hover:bg-brandColor/80 transition-colors">
                   Open Swap Interface
                 </button>
               </TokenSwapDrawer>
-              <TokenBalances />
+              <TokenBalances /> */}
             </div>
           </div>
         </div>
@@ -164,7 +173,7 @@ export default function Home() {
               </button>
             </div>
           </div>
-          <div className="overflow-auto w-full" style={{ maxHeight: 'calc(100% - 150px)' }}>
+          <div className="overflow-auto w-full" style={{ maxHeight: 'calc(100% - 95px)' }}>
             <table className="w-full">
               <thead>
                 <tr>

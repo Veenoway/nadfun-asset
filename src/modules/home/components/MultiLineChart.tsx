@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import { useMainStore } from '@/store/useMainStore';
-import { useModalStore } from '@/store/useModalStore';
 import Chart from 'chart.js/auto';
 import { useEffect, useMemo, useRef } from 'react';
 import { MultiLineChartProps } from '../types';
@@ -55,20 +54,13 @@ export const MultiLineChart = ({
   axisPadding = 5,
   enableAnimation = true,
   animationDuration = 750,
-  enableSecondaryYAxis = false,
-  secondaryYAxisPosition = 'right',
-  buyPointColor = '#00ff88',
-  sellPointColor = '#ff4444',
-  buyPointRadius = 8,
-  sellPointRadius = 8,
 }: MultiLineChartProps) => {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const { selectedTokens } = useMainStore();
   const chartInstance = useRef<Chart | null>(null);
-  const { isOpen } = useModalStore();
 
-  const tokenChart = data?.map((entry) => entry.chart.data);
-  const tokenInfo = data?.map((entry) => entry.token.data);
+  const tokenChart = useMemo(() => data?.map((entry) => entry.chart.data), [selectedTokens, data]);
+  const tokenInfo = useMemo(() => data?.map((entry) => entry.token.data), [selectedTokens, data]);
 
   const labels = useMemo(() => {
     if (!tokenChart?.length) return [];
@@ -77,7 +69,7 @@ export const MultiLineChart = ({
 
     tokenChart.forEach((chartData) => {
       if (chartData?.length) {
-        chartData.forEach((point) => {
+        chartData.forEach((point: any) => {
           const timestamp =
             typeof point.time === 'number' ? point.time : new Date(point.time).getTime();
           allTimestamps.add(timestamp);
@@ -88,7 +80,7 @@ export const MultiLineChart = ({
     const sortedTimestamps = Array.from(allTimestamps).sort((a, b) => a - b);
 
     return sortedTimestamps;
-  }, [tokenChart, isOpen, selectedTokens]);
+  }, [tokenChart]);
 
   const datasets = useMemo(() => {
     if (!tokenChart?.length || !labels.length) return [];
@@ -99,7 +91,7 @@ export const MultiLineChart = ({
 
       const priceByTimestamp = new Map<number, number>();
       if (chartData?.length) {
-        chartData.forEach((point) => {
+        chartData.forEach((point: any) => {
           const timestamp =
             typeof point.time === 'number' ? point.time : new Date(point.time).getTime();
           priceByTimestamp.set(timestamp, point[dataType === 'price' ? 'close' : 'volume']);
@@ -129,16 +121,7 @@ export const MultiLineChart = ({
         // __tx: tx,
       } as any;
     });
-  }, [
-    tokenChart,
-    tokenInfo,
-    labels,
-    pointRadius,
-    pointHoverRadius,
-    pointBorderColor,
-    pointBorderWidth,
-    isOpen,
-  ]);
+  }, [selectedTokens, data]);
 
   useEffect(() => {
     if (chartInstance.current) {
@@ -278,34 +261,7 @@ export const MultiLineChart = ({
     });
 
     return () => chartInstance.current?.destroy();
-  }, [
-    labels,
-    datasets,
-    isOpen,
-    gridDisplay,
-    gridColor,
-    axisColor,
-    axisFontSize,
-    axisFontFamily,
-    axisPadding,
-    enableAnimation,
-    animationDuration,
-    enableSecondaryYAxis,
-    secondaryYAxisPosition,
-    tooltipBackground,
-    tooltipTitleColor,
-    tooltipBodyColor,
-    tooltipBorderColor,
-    tooltipBorderWidth,
-    tooltipDisplayColors,
-    tooltipPadding,
-    tooltipCornerRadius,
-    buyPointColor,
-    sellPointColor,
-    buyPointRadius,
-    sellPointRadius,
-    dataType,
-  ]);
+  }, [selectedTokens, dataType, data]);
 
   if (!data || !data.length) {
     return (
@@ -318,7 +274,7 @@ export const MultiLineChart = ({
           justifyContent: 'center',
         }}
       >
-        <span style={{ color: axisColor }}>No data available</span>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brandColor" />
       </div>
     );
   }

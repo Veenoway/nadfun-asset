@@ -11,7 +11,7 @@ type UdfResponse = {
 };
 
 type CandlePoint = {
-  time: string; // ms
+  time: number; // ms
   open: number;
   high: number;
   low: number;
@@ -42,10 +42,6 @@ export function toPoints(r: UdfResponse): CandlePoint[] {
   }
 
   return pts;
-}
-
-function timestampToDateString(timestamp: number): string {
-  return new Date(timestamp).toISOString().split('T')[0];
 }
 
 export function toDecimalString(num: number): string {

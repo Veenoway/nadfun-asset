@@ -118,7 +118,7 @@ const TokenItem = ({ token, onCompare }: TokenItemProps) => {
     <button
       type="button"
       className={cn(
-        'group/item flex items-center gap-3 px-3 py-1 my-1.5 mx-1 rounded-md',
+        'group/item flex items-center gap-2 px-2 py-1 my-1.5 mx-1 rounded-md',
         'bg-terciary border border-borderColor hover:bg-quaternary',
         'shadow-sm hover:shadow transition-colors',
         selected && 'bg-quaternary'
@@ -138,9 +138,9 @@ const TokenItem = ({ token, onCompare }: TokenItemProps) => {
         alt={`${token.name} logo`}
         width={20}
         height={20}
-        className="rounded-sm"
+        className="rounded-full object-cover aspect-square"
       />
-      <span className="font-medium">{token.symbol}</span>
+      <span className="font-medium uppercase">{token.symbol}</span>
     </button>
   );
 };

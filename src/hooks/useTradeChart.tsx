@@ -5,7 +5,7 @@ import { useQueries, useQuery, UseQueryOptions } from '@tanstack/react-query';
 type TokenAddress = string;
 
 type CandlePoint = {
-  time: string;
+  time: number;
   open: number;
   high: number;
   low: number;
@@ -57,8 +57,6 @@ export function useMultiTokenChart(addresses: TokenAddress[], pollingMs = 4000) 
     const tokenInfo = (
       tokenQuery as unknown as { data: { tokens: { tokens: { token_info: TokenInfo }[] } } }
     )?.data?.tokens?.tokens?.[0]?.token_info;
-
-    console.log('MY TOKEN INFO', tokenInfo, addresses, chartQuery?.data);
 
     return {
       address,

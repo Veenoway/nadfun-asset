@@ -96,7 +96,6 @@ export function useTradeHistoryMany(
       );
       console.log('resultsresults', results);
       const { out: merged, total } = dedupeById(results);
-      console.log('mergedmerged', merged);
       return { items: merged, total };
     },
   });

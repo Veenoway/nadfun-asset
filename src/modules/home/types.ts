@@ -111,8 +111,8 @@ export type ChartPoint = {
 
 export type AddressRow<TChart = ChartPoint> = {
   address: `0x${string}`;
-  token: TokenInfo;
-  chart: TChart[];
+  token: { data: TokenInfo };
+  chart: { data: TChart[] };
   isLoading: boolean;
   error: Error | null;
 };
@@ -279,7 +279,7 @@ export interface TokenSwapResponse {
 }
 
 // Token Market Response
-export interface TokenMarketResponse extends DetailedMarket {}
+export type TokenMarketResponse = DetailedMarket;
 
 // Token Holder types
 export interface TokenHolder {

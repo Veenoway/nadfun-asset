@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useMainStore } from '@/store/useMainStore';
+import { useNadFunTrading } from '@/hooks/useNadFunTrading';
+import { useMultipleTokenPrices } from '@/hooks/useTokens';
 import {
   Drawer,
   DrawerContent,
@@ -9,11 +10,11 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/lib/shadcn/drawer';
+import { useMainStore } from '@/store/useMainStore';
 import { cn } from '@/utils/cn';
-import { useMultipleTokenPrices } from '@/hooks/useTokens';
-import { useNadFunTrading } from '@/hooks/useNadFunTrading';
+import { useEffect, useState } from 'react';
+import { formatEther } from 'viem';
 import { useAccount, useBalance } from 'wagmi';
-import { formatEther, parseEther } from 'viem';
 
 interface TokenSwapDrawerProps {
   children: React.ReactNode;
@@ -51,7 +52,7 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
     buyToken,
     sellToken,
     amountOut,
-    balance: tradingBalance,
+    // balance: tradingBalance,
   } = useNadFunTrading(firstToken?.token_address, tradingAmount, mode === 'sell');
 
   // Calculate available balance
@@ -68,8 +69,8 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
     if (!selectedTokens.length || !fromAmount || Number(fromAmount) <= 0 || !isValidAmount)
       return {};
 
-    const monToSpend = Number(fromAmount);
-    const monPerToken = monToSpend / selectedTokens.length;
+    // const monToSpend = Number(fromAmount);
+    // const monPerToken = monToSpend / selectedTokens.length;
 
     const tokenAmounts: Record<string, string> = {};
     selectedTokens.forEach((token, index) => {
@@ -343,7 +344,8 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
                 )}
 
                 {mode === 'buy' &&
-                  selectedTokens.map((token, index) => (
+                  selectedTokens.length > 0 &&
+                  selectedTokens.map((token) => (
                     <div key={token.symbol} className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-black/60 lowercase">
