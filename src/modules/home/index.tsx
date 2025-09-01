@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { isAddress } from 'viem/utils';
 import { InfiniteTokenSelector } from './components/InfiniteTokenSelector';
 import { MultiLineChart } from './components/MultiLineChart';
+import { TokenBalances } from './components/TokenBalances';
 import { TokenModal } from './components/TokenModal';
 import { AddressRow, Asset, DataType } from './types';
 import { makeChart } from './utils/makeChart';
@@ -71,7 +72,7 @@ export default function Home({ defaultSelectedTokens }: { defaultSelectedTokens:
   }));
 
   return (
-    <main className="max-w-screen-2xl mx-auto p-8 w-full pt-[100px]">
+    <main className="max-w-screen-2xl mx-auto p-8 pt-0 w-full">
       <InfiniteTokenSelector tokens={assets || []} />
       <section
         className="grid grid-cols-12 grid-flow-dense gap-4 min-h-screen
@@ -127,8 +128,8 @@ export default function Home({ defaultSelectedTokens }: { defaultSelectedTokens:
                 <button className="w-full bg-brandColor text-white px-4 py-3 rounded-md hover:bg-brandColor/80 transition-colors">
                   Open Swap Interface
                 </button>
-              </TokenSwapDrawer>
-              <TokenBalances /> */}
+              </TokenSwapDrawer> */}
+              <TokenBalances />
             </div>
           </div>
         </div>

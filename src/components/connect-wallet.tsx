@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { formatEther } from 'viem';
 import { useAccount, useBalance, useDisconnect, useSwitchChain } from 'wagmi';
 import { WalletModal } from './connect-modal';
-import { formatEther } from 'viem';
 
 export function WalletConnection() {
   // const { open } = useAppKit();
@@ -35,7 +35,6 @@ export function WalletConnection() {
     return `${formatted} MON`;
   };
 
-  console.log('chainID;', chainId);
   const isWrongNetwork = chainId !== 10143;
 
   const handleSwitchNetwork = async () => {
@@ -77,8 +76,8 @@ export function WalletConnection() {
           <button
             onClick={() => setOpen(true)}
             className={`bg-brandColor
-             flex items-center rounded uppercase mx-auto w-fit h-[40px] sm:h-[50px] px-2.5 sm:px-5 py-5
-             text-lg sm:text-xl text-white font-medium transition-all duration-300 ease-in-out
+             flex items-center rounded uppercase mx-auto w-fit h-[30px] sm:h-[35px] px-2.5 py-1
+             text-sm sm:text-sm text-white font-medium transition-all duration-300 ease-in-out
              ${isConnecting ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             Connect Wallet
@@ -90,8 +89,8 @@ export function WalletConnection() {
           {/* Balance Display */}
           <div
             className="bg-brandColor
-                flex items-center rounded uppercase mx-auto w-fit h-[40px] sm:h-[50px] px-2.5 sm:px-5 py-5
-                text-lg sm:text-xl text-white font-semibold transition-all duration-300 ease-in-out"
+                flex items-center rounded uppercase mx-auto w-fit h-[30px] sm:h-[35px] px-2.5 py-1
+                text-sm sm:text-sm text-white font-semibold transition-all duration-300 ease-in-out"
           >
             <span className="text-sm font-medium text-white">{formatBalance()}</span>
           </div>
@@ -100,8 +99,8 @@ export function WalletConnection() {
           <button
             onClick={handleDisconnect}
             className={`bg-brandColor
-                flex items-center rounded uppercase mx-auto w-fit h-[40px] sm:h-[50px] px-2.5 sm:px-5 py-5
-                text-lg sm:text-xl text-white font-semibold transition-all duration-300 ease-in-out
+                flex items-center rounded uppercase mx-auto w-fit h-[30px] sm:h-[35px] px-2.5 py-1
+                text-sm sm:text-sm text-white font-semibold transition-all duration-300 ease-in-out
                 ${isConnecting || isInitialLoading ? 'animate-pulse' : ''}`}
           >
             {getDisplayText()}
