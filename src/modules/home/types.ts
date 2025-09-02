@@ -1,6 +1,6 @@
 // CHART TYPES
 export interface MultiLineChartProps {
-  data: MultiLineDataPoint[];
+  data: AddressRow[];
   lines: LineConfig[];
   height?: string;
   pointRadius?: number;
@@ -30,15 +30,7 @@ export interface MultiLineChartProps {
   animationDuration?: number;
   enableSecondaryYAxis?: boolean;
   secondaryYAxisPosition?: 'left' | 'right';
-}
-
-export interface MultiLineDataPoint {
-  date: string;
-  buyPoint?: boolean;
-  sellPoint?: boolean;
-  buyAmount?: number;
-  sellAmount?: number;
-  [key: string]: number | string | boolean | undefined;
+  dataType?: DataType;
 }
 
 export interface LineConfig {
@@ -95,26 +87,37 @@ export interface AxisConfig {
   };
 }
 
-// ASSET TYPES
-export type ChartPoint = {
-  date: string; // "YYYY-MM-DD"
-  price: number;
-  buyPoint: boolean;
-  sellPoint: boolean;
-  buyAmount: number;
-  sellAmount: number;
-};
-
 export type Asset = {
+  token_address: string;
   logo: string;
   symbol: string;
   name: string;
   price: number;
   chart: ChartPoint[];
-  token_address?: string;
 };
 
-// Type definitions for Nad.fun API responses
+export type DataType = 'price' | 'volume';
+
+export type TokenInfo = {
+  image_uri: string;
+  name: string;
+  symbol: string;
+  token_id: string;
+};
+
+export type ChartPoint = {
+  data: { t: number; o: number; h: number; l: number; c: number; v?: number }[];
+};
+
+export type AddressRow<TChart = ChartPoint> = {
+  address: `0x${string}`;
+  token: { data: TokenInfo };
+  chart: { data: TChart[] };
+  isLoading: boolean;
+  error: Error | null;
+};
+
+export type AddressRows<TChart = ChartPoint> = AddressRow<TChart>[];
 
 export interface AccountInfo {
   account_id: string;
@@ -124,7 +127,6 @@ export interface AccountInfo {
   following_count: number;
 }
 
-// Order Token Response
 export interface OrderTokenResponse {
   order_type: string;
   order_token: Array<{
@@ -277,7 +279,7 @@ export interface TokenSwapResponse {
 }
 
 // Token Market Response
-export interface TokenMarketResponse extends DetailedMarket {}
+export type TokenMarketResponse = DetailedMarket;
 
 // Token Holder types
 export interface TokenHolder {

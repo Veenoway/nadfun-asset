@@ -1,4 +1,3 @@
-import { assets } from '@/modules/home/constant';
 import { Asset } from '@/modules/home/types';
 import { create } from 'zustand';
 
@@ -10,7 +9,7 @@ type CounterState = {
 };
 
 export const useMainStore = create<CounterState>()((set) => ({
-  tokens: assets,
+  tokens: [],
   setTokens: (tokens: Asset[]) => set({ tokens }),
   selectedTokens: [],
   setSelectedTokens: (selectedTokens: Asset[]) => set({ selectedTokens }),

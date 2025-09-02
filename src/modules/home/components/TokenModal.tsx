@@ -12,7 +12,7 @@ import { useMainStore } from '@/store/useMainStore';
 import { useModalStore } from '@/store/useModalStore';
 import { cn } from '@/utils/cn';
 import * as React from 'react';
-import { assets } from '../constant';
+import { Asset } from '../types';
 
 type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
 
@@ -33,9 +33,11 @@ export type TokenModalProps = {
   className?: string;
   contentClassName?: string;
   children?: React.ReactNode;
+  tokens: Asset[];
 };
 
 export function TokenModal({
+  tokens,
   size = 'md',
   footer,
   showDefaultActions = true,
@@ -58,7 +60,7 @@ export function TokenModal({
             <DialogDescription>Select the tokens you want to add</DialogDescription>
           </DialogHeader>
           <div className="overflow-y-auto gap-3">
-            {assets?.map((asset) => (
+            {tokens?.map((asset) => (
               <div
                 key={asset.symbol}
                 className={`flex items-center gap-3 mb-2 cursor-pointer p-2 rounded-lg hover:bg-white/5 transition-all duration-300 ${
