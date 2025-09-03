@@ -102,7 +102,7 @@ export function formatTokenBalanceDisplay(balance: string): string {
 
 export function formatNickname(nickname: string): string {
   if (isAddress(nickname)) {
-    return nickname.slice(0, 6);
+    return nickname.slice(0, 3) + nickname.slice(-3);
   }
   return nickname;
 }

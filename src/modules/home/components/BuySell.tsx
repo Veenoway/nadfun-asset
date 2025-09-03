@@ -10,9 +10,10 @@ import { formatTokenBalanceDisplay } from '@/utils/helpers';
 
 interface BuySellProps {
   selectedToken: KingOfTheHillResponse;
+  isFromMyTokens?: boolean;
 }
 
-const BuySell = ({ selectedToken }: BuySellProps) => {
+const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
   const { address } = useAccount();
   const { data: balance } = useBalance({ address });
 
@@ -21,6 +22,9 @@ const BuySell = ({ selectedToken }: BuySellProps) => {
   const [fromAmount, setFromAmount] = useState('');
   const [tokenAmount, setTokenAmount] = useState('');
   const [userTokenBalance, setUserTokenBalance] = useState('0.000000');
+
+  // Check if user owns this token
+  const userOwnsToken = userTokenBalance !== '0.000000' && Number(userTokenBalance) > 0;
 
   useEffect(() => {
     console.log(selectedToken);
@@ -53,7 +57,14 @@ const BuySell = ({ selectedToken }: BuySellProps) => {
     } else {
       setUserTokenBalance('0.000000');
     }
-  }, [tokenBalance]);
+  }, [tokenBalance, selectedToken?.token_info.token_id]);
+
+  // Auto-select sell mode when token is from My Tokens
+  useEffect(() => {
+    if (isFromMyTokens && userOwnsToken) {
+      setMode('sell');
+    }
+  }, [isFromMyTokens, userOwnsToken]);
 
   // Calculate available balance
   const availableBalance = balance ? Number(formatEther(balance.value)) : 0;
@@ -153,11 +164,13 @@ const BuySell = ({ selectedToken }: BuySellProps) => {
                 </button>
                 <button
                   onClick={() => setMode('sell')}
+                  disabled={!userOwnsToken}
                   className={cn(
                     'px-3 py-1 text-xs font-medium transition-colors',
                     mode === 'sell'
                       ? 'bg-brandColor text-white'
-                      : 'bg-secondary text-white/60 hover:text-white'
+                      : 'bg-secondary text-white/60 hover:text-white',
+                    !userOwnsToken && 'opacity-50 cursor-not-allowed'
                   )}
                 >
                   Sell for MON
@@ -169,7 +182,7 @@ const BuySell = ({ selectedToken }: BuySellProps) => {
           {mode === 'buy' ? (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium  lowercase">mon to spend</span>
+                <span className="text-sm font-medium">MON to spend</span>
                 <span className="text-xs ">Available: {availableBalance.toFixed(4)} MON</span>
               </div>
               <div className="border border-borderColor rounded-lg p-4 bg-secondary">
@@ -186,9 +199,9 @@ const BuySell = ({ selectedToken }: BuySellProps) => {
                     className="text-lg font-mono text-white bg-transparent outline-none flex-1"
                     placeholder="0.0"
                   />
-                  <div className="flex items-center gap-2">
+                  {/* <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-white">MON</span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
               {fromAmount && Number(fromAmount) > availableBalance && (
@@ -236,7 +249,7 @@ const BuySell = ({ selectedToken }: BuySellProps) => {
                     className="text-lg font-mono text-white bg-transparent outline-none flex-1"
                     placeholder="0.0"
                   />
-                  <div className="flex items-center gap-2">
+                  {/* <div className="flex items-center gap-2">
                     <img
                       src={selectedToken?.token_info.image_uri}
                       alt={selectedToken?.token_info.name}
@@ -245,7 +258,7 @@ const BuySell = ({ selectedToken }: BuySellProps) => {
                     <span className="text-sm font-medium text-white">
                       {selectedToken?.token_info.symbol}
                     </span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
               {tokenAmount && Number(tokenAmount) > Number(userTokenBalance) && (
@@ -260,11 +273,13 @@ const BuySell = ({ selectedToken }: BuySellProps) => {
           {mode === 'sell' && amountOut && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-black/60 lowercase">mon to receive</span>
+                <span className="text-sm font-medium text-white lowercase">MON to receive</span>
               </div>
               <div className="border border-borderColor rounded-lg p-4 bg-secondary">
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-mono text-white">{amountOut}</span>
+                  <span className="text-lg font-mono text-white">
+                    {Number(amountOut).toFixed(4)}
+                  </span>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-white">MON</span>
                   </div>
@@ -362,7 +377,7 @@ const BuySell = ({ selectedToken }: BuySellProps) => {
         </div>
       </div>
 
-      <div className="p-6 border-t border-borderColor bg-white">
+      <div className="p-6 border-t border-borderColor">
         <button
           onClick={handleSwap}
           disabled={isTradingLoading || isListed || isLocked}

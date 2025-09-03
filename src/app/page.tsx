@@ -15,6 +15,7 @@ import BuySell from '@/modules/home/components/BuySell';
 interface SelectedToken {
   token: any;
   tabId: string;
+  source: 'recent' | 'my-tokens';
 }
 
 export default function HomePage() {
@@ -47,7 +48,7 @@ export default function HomePage() {
   const trades = useMemo(() => data?.items, [data]);
 
   // Handle token selection
-  const handleTokenSelect = (token: any) => {
+  const handleTokenSelect = (token: any, source: 'recent' | 'my-tokens') => {
     // Check if token is already selected
     const isAlreadySelected = selectedTokens.some(
       (st) => st.token.token_info.token_id === token.token_info.token_id
@@ -71,6 +72,7 @@ export default function HomePage() {
       const newToken: SelectedToken = {
         token,
         tabId: `tab-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        source,
       };
       const updatedTokens = [...newSelectedTokens, newToken];
       setSelectedTokens(updatedTokens);
@@ -80,6 +82,7 @@ export default function HomePage() {
       const newToken: SelectedToken = {
         token,
         tabId: `tab-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        source,
       };
       const updatedTokens = [...selectedTokens, newToken];
       setSelectedTokens(updatedTokens);
@@ -296,7 +299,8 @@ export default function HomePage() {
                                               className="w-6 h-6 rounded-full"
                                             />
                                             {isAddress(trade.account_info.nickname)
-                                              ? trade.account_info.nickname.slice(0, 6)
+                                              ? trade.account_info.nickname.slice(0, 3) +
+                                                trade.account_info.nickname.slice(-3)
                                               : trade.account_info.nickname}
                                           </div>
                                         </td>
@@ -358,7 +362,10 @@ export default function HomePage() {
 
                     {/* Buy/Sell Actions */}
                     <div className="w-1/3 border border-borderColor p-4 rounded-lg">
-                      <BuySell selectedToken={selectedToken.token} />
+                      <BuySell
+                        selectedToken={selectedToken.token}
+                        isFromMyTokens={selectedToken.source === 'my-tokens'}
+                      />
                     </div>
                   </div>
                 </div>
