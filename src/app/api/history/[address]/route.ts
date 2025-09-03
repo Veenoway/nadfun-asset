@@ -2,17 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const BASE_URL = process.env.NEXT_PUBLIC_NAD_API_BASE ?? 'https://testnet-v3-api.nad.fun';
 
-export async function GET(
-  req: NextRequest,
-  {
-    params,
-  }: {
-    params: { address: string; page: number; limit: number; direction: string; trade_type: string };
-  }
-) {
-  const url = `${BASE_URL}/trade/swap-history/${
-    params?.address
-  }?${req.nextUrl.searchParams.toString()}`;
+export async function GET(req: NextRequest, { params }: { params: Promise<{ address: string }> }) {
+  const { address } = await params;
+  const url = `${BASE_URL}/trade/swap-history/${address}?${req.nextUrl.searchParams.toString()}`;
 
   const upstream = await fetch(url, {
     cache: 'no-store',
