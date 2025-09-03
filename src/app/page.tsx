@@ -1,18 +1,17 @@
 'use client';
 
 import { useTokensByCreationTime, useTokensByMarketCap } from '@/hooks/useTokens';
-import { useTradeHistoryMany, useTradeHistoryOne } from '@/hooks/useTradeHistory';
+import { useTradeHistoryOne } from '@/hooks/useTradeHistory';
 import { InfiniteTokenSelector } from '@/modules/home/components/InfiniteTokenSelector';
 import RecentTokens from '@/modules/home/components/RecentTokens';
-import { formatMarketCap, formatNickname, formatRelativeTime } from '@/utils/helpers';
-import { isAddress, formatEther } from 'viem';
+import { isAddress } from 'viem';
 
 import { useEffect, useMemo, useState } from 'react';
 import { formatAmount } from '@/modules/home/utils/number';
-import { TokenSwapDrawer } from '@/modules/home/components/TokenSwapDrawer';
 import BuySell from '@/modules/home/components/BuySell';
 
 interface SelectedToken {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   token: any;
   tabId: string;
   source: 'recent' | 'my-tokens';
@@ -36,7 +35,7 @@ export default function HomePage() {
     token_address: token.token_info.token_id,
   }));
 
-  const { data, isLoading } = useTradeHistoryOne(
+  const { data } = useTradeHistoryOne(
     selectedTokens.find((st) => st.tabId === activeTab)?.token.token_info.token_id || '',
     page,
     limit,
@@ -48,6 +47,8 @@ export default function HomePage() {
   const trades = useMemo(() => data?.items, [data]);
 
   // Handle token selection
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleTokenSelect = (token: any, source: 'recent' | 'my-tokens') => {
     // Check if token is already selected
     const isAlreadySelected = selectedTokens.some(
@@ -241,6 +242,7 @@ export default function HomePage() {
                                   </tr>
                                 </thead>
                                 <tbody>
+                                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                   {trades?.map((trade: any) => {
                                     const token = selectedTokens.find(
                                       (t) =>

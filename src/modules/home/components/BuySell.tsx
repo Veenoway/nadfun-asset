@@ -2,9 +2,8 @@ import { formatEther } from 'viem';
 import { cn } from '@/utils/cn';
 import { useEffect, useState } from 'react';
 import { useAccount, useBalance } from 'wagmi';
-import { useMainStore } from '@/store/useMainStore';
 import { useNadFunTrading } from '@/hooks/useNadFunTrading';
-import { KingOfTheHillResponse, Token, TokenInfoResponse } from '../types';
+import { KingOfTheHillResponse } from '../types';
 import { useUserTokenBalances } from '@/hooks/useTokens';
 import { formatTokenBalanceDisplay } from '@/utils/helpers';
 
@@ -17,7 +16,6 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
   const { address } = useAccount();
   const { data: balance } = useBalance({ address });
 
-  const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<'buy' | 'sell'>('buy');
   const [fromAmount, setFromAmount] = useState('');
   const [tokenAmount, setTokenAmount] = useState('');
@@ -33,7 +31,7 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
   const tradingAmount = mode === 'buy' ? fromAmount : tokenAmount;
   const {
     isLoading: isTradingLoading,
-    error: tradingError,
+
     isSuccess: isTradeSuccess,
     isListed,
     isLocked,
@@ -80,7 +78,7 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
   useEffect(() => {
     if (isTradeSuccess) {
       alert('Token traded successfully!');
-      setIsOpen(false);
+
       setFromAmount('');
       setTokenAmount('');
     }

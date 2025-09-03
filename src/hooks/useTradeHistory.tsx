@@ -52,27 +52,27 @@ async function getTradesForAddress({
   return { items: items.map((it) => ({ ...it, _address: address })), total };
 }
 
-async function getTradeForAddress({
-  address,
-  page = 1,
-  limit = 15,
-  direction = 'DESC',
-  trade_type = 'ALL',
-  signal,
-}: GetTradesParams): Promise<{ items: Trade[]; total?: number }> {
-  const url = `/api/history/${address}?page=${page}&limit=${limit}&direction=${direction}&trade_type=${trade_type}`;
+// async function getTradeForAddress({
+//   address,
+//   page = 1,
+//   limit = 15,
+//   direction = 'DESC',
+//   trade_type = 'ALL',
+//   signal,
+// }: GetTradesParams): Promise<{ items: Trade[]; total?: number }> {
+//   const url = `/api/history/${address}?page=${page}&limit=${limit}&direction=${direction}&trade_type=${trade_type}`;
 
-  const res = await fetch(url, { cache: 'no-store', signal });
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw new Error(`HTTP ${res.status} ${body}`);
-  }
-  const json: ApiResp = await res.json();
-  const items = json.swaps ?? [];
-  const total = json.total_count;
+//   const res = await fetch(url, { cache: 'no-store', signal });
+//   if (!res.ok) {
+//     const body = await res.text().catch(() => '');
+//     throw new Error(`HTTP ${res.status} ${body}`);
+//   }
+//   const json: ApiResp = await res.json();
+//   const items = json.swaps ?? [];
+//   const total = json.total_count;
 
-  return { items: items.map((it) => ({ ...it, _address: address })), total };
-}
+//   return { items: items.map((it) => ({ ...it, _address: address })), total };
+// }
 
 function dedupeById(data: { address: string; items: Trade[]; total?: number }[]) {
   const items = data.flatMap((d) => d.items);

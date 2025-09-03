@@ -59,7 +59,11 @@ export const TokenBalances = () => {
 
     // Update the store with selected tokens for selling
     const selectedTokenData = balances.tokens
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .filter((token: any) => newSelected.has(token.token_info.token_id))
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((token: any) => ({
         token_address: token.token_info.token_id,
         symbol: token.token_info.symbol,
@@ -90,6 +94,7 @@ export const TokenBalances = () => {
       </div>
 
       <div className="space-y-3 max-h-96 overflow-y-auto">
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {balances.tokens.map((token: any, index: number) => {
           const isSelected = selectedTokens.has(token.token_info.token_id);
           return (

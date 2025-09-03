@@ -239,6 +239,7 @@ export const useNadFunTrading = (
           },
         };
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const signature = await signTypedDataAsync(permitData as any);
 
         // Split signature into v, r, s

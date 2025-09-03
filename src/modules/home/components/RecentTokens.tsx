@@ -8,6 +8,7 @@ import { useAccount } from 'wagmi';
 interface RecentTokensProps {
   tokensByCreationTime?: OrderTokenResponse;
   handleTokenSelect: (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     token: OrderTokenResponse['king_of_the_hill'] | OrderTokenResponse['order_token'][0] | any,
     source: 'recent' | 'my-tokens'
   ) => void;
@@ -141,6 +142,7 @@ const RecentTokens = ({ tokensByCreationTime, handleTokenSelect }: RecentTokensP
                 <p>Connect your wallet to view your tokens</p>
               </div>
             ) : userTokens?.tokens && userTokens.tokens.length > 0 ? (
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               userTokens.tokens.map((token: any) => (
                 <div
                   key={token.token_info.token_id}
