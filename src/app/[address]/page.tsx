@@ -1,17 +1,20 @@
 import Home from '@/modules/home';
-import { Asset, TokenInfo } from '@/modules/home/types';
+import { Asset, TokenInfo, TokenInfoWithAccountInfo } from '@/modules/home/types';
 import { toPoints } from '@/modules/home/utils/number';
 
 type PageData = {
-  token_address: string;
-  token: {
-    data: TokenInfo | null;
-    error?: string;
-  };
-  chart: {
-    data: unknown[];
-    error?: string;
-  };
+  selectedTokens: {
+    token_address: string;
+    token: {
+      data: TokenInfo | null;
+      error?: string;
+    };
+    chart: {
+      data: unknown[];
+      error?: string;
+    };
+  }[];
+  info: TokenInfoWithAccountInfo | null;
 };
 
 async function getPageData(address: string): Promise<PageData | null> {
@@ -26,7 +29,7 @@ async function getPageData(address: string): Promise<PageData | null> {
       throw new Error(`Token API error: ${tokenRes.status}`);
     }
 
-    const tokenInfo = await tokenRes.json();
+    const tokenData = await tokenRes.json();
 
     const qs = new URLSearchParams({
       resolution: '1',
@@ -43,21 +46,36 @@ async function getPageData(address: string): Promise<PageData | null> {
     );
     const chartInfo = await chartRes.json();
 
+    const tokenInfoRes = await fetch(`https://testnet-v3-api.nad.fun/token/${address}`, {
+      cache: 'no-store',
+    });
+    const tokenInfo = await tokenInfoRes.json();
+
     return {
-      token_address: address,
-      token: {
-        data: tokenInfo?.tokens?.tokens?.[0],
-      },
-      chart: {
-        data: toPoints(chartInfo || []) ?? [],
-      },
+      selectedTokens: [
+        {
+          token_address: address,
+          token: {
+            data: tokenData?.tokens?.tokens?.[0],
+          },
+          chart: {
+            data: toPoints(chartInfo || []) ?? [],
+          },
+        },
+      ],
+      info: tokenInfo.token,
     };
   } catch (error) {
     console.error('Error fetching page data:', error);
     return {
-      token_address: address,
-      token: { data: null, error: error instanceof Error ? error.message : 'Unknown error' },
-      chart: { data: [], error: error instanceof Error ? error.message : 'Unknown error' },
+      selectedTokens: [
+        {
+          token_address: address,
+          token: { data: null, error: error instanceof Error ? error.message : 'Unknown error' },
+          chart: { data: [], error: error instanceof Error ? error.message : 'Unknown error' },
+        },
+      ],
+      info: null,
     };
   }
 }
@@ -70,5 +88,7 @@ export default async function Page({ params }: { params: { address: string } }) 
     return <div>Invalid address</div>;
   }
 
-  return <Home defaultSelectedTokens={[data as unknown as Asset]} />;
+  return (
+    <Home defaultSelectedTokens={data.selectedTokens as unknown as Asset[]} info={data.info} />
+  );
 }

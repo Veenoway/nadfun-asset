@@ -105,6 +105,31 @@ export type TokenInfo = {
   token_id: string;
 };
 
+export type TokenInfoWithAccountInfo = {
+  created_at: number;
+  description: string;
+  image_uri: string;
+  is_king: boolean;
+  is_king_created: boolean;
+  is_listing: boolean;
+  market_cap: string;
+  name: string;
+  price: string;
+  symbol: string;
+  telegram: string;
+  token_id: string;
+  total_supply: string;
+  transaction_hash: string;
+  twitter: string;
+  website: string;
+  account_info: {
+    account_id: string;
+    nickname: string;
+    image_uri: string;
+    follower_count: number;
+    following_count: number;
+  };
+};
 export type ChartPoint = {
   data: { t: number; o: number; h: number; l: number; c: number; v?: number }[];
 };

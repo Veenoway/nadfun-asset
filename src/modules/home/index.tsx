@@ -10,7 +10,7 @@ import { InfiniteTokenSelector } from './components/InfiniteTokenSelector';
 import { MultiLineChart } from './components/MultiLineChart';
 import { TokenBalances } from './components/TokenBalances';
 import { TokenModal } from './components/TokenModal';
-import { AddressRow, Asset, DataType } from './types';
+import { AddressRow, Asset, DataType, TokenInfoWithAccountInfo } from './types';
 import { makeChart } from './utils/makeChart';
 import { formatAmount } from './utils/number';
 
@@ -26,7 +26,13 @@ const lineConfigs = [
   },
 ];
 
-export default function Home({ defaultSelectedTokens }: { defaultSelectedTokens: Asset[] }) {
+export default function Home({
+  defaultSelectedTokens,
+  info,
+}: {
+  defaultSelectedTokens: Asset[];
+  info: TokenInfoWithAccountInfo;
+}) {
   const { toggle } = useModalStore();
   const [dataType, setDataType] = useState<DataType>('price');
   const { selectedTokens, setSelectedTokens } = useMainStore();
@@ -70,6 +76,8 @@ export default function Home({ defaultSelectedTokens }: { defaultSelectedTokens:
     price: Number(token.token_info.market_cap),
     chart: makeChart(Number(token.token_info.market_cap), 11),
   }));
+
+  console.log(info);
 
   return (
     <main className="max-w-screen-2xl mx-auto p-8 pt-0 w-full">
@@ -121,7 +129,7 @@ export default function Home({ defaultSelectedTokens }: { defaultSelectedTokens:
           </div>
         </div>
         <TokenModal tokens={assets || []} />
-        <div className="col-span-12 lg:col-span-4 row-span-3 bg-secondary p-6 rounded-lg h-full border border-borderColor">
+        <div className="col-span-12 lg:col-span-4 row-span-2 bg-secondary p-6 rounded-lg h-full border border-borderColor">
           <div className="flex h-full min-h-0 flex-col gap-4 overflow-auto">
             <div className="flex flex-col gap-2">
               {/* <TokenSwapDrawer>
@@ -174,7 +182,7 @@ export default function Home({ defaultSelectedTokens }: { defaultSelectedTokens:
               </button>
             </div>
           </div>
-          <div className="overflow-auto w-full" style={{ maxHeight: 'calc(100% - 95px)' }}>
+          <div className="overflow-auto w-full" style={{ maxHeight: 'calc(100% - 90px)' }}>
             <table className="w-full">
               <thead>
                 <tr>
@@ -182,9 +190,7 @@ export default function Home({ defaultSelectedTokens }: { defaultSelectedTokens:
                   <th className="text-left border-y border-borderColor py-3">User</th>
                   <th className="text-right border-y border-borderColor py-3">MON</th>
                   <th className="text-right border-y border-borderColor py-3">Token Amount</th>
-                  <th className="text-right border-y border-borderColor py-3 pr-3">
-                    Transaction Hash
-                  </th>
+                  <th className="text-right border-y border-borderColor py-3 pr-3">Tx Hash</th>
                 </tr>
               </thead>
               {isLoading ? (
@@ -287,33 +293,44 @@ export default function Home({ defaultSelectedTokens }: { defaultSelectedTokens:
             </table>
           </div>
           <div className="flex justify-between mt-5 gap-2 items-center">
-            <div className="text-sm text-white/60">Showing {total} trades</div>
+            <div className="text-sm text-white/60">Total of {total} transactions</div>
             <div className="flex items-center gap-2">
               {page > 1 && (
                 <button
-                  className={`border border-borderColor text-sm px-3 py-1 rounded-md transition-all duration-200 ease-in-out bg-secondary hover:bg-terciary text-white/60 hover:text-white`}
+                  className={`border border-borderColor text-sm px-3 py-1 rounded-md transition-all duration-200 ease-in-out bg-secondary hover:bg-terciary text-white hover:text-white`}
                   onClick={() => setPage(page - 1)}
                 >
                   Prev
                 </button>
               )}
+              <span className="text-sm text-white/60">
+                {page} of {Math.ceil(total ?? 1 / limit)}
+              </span>
               <button
-                className={`border border-borderColor text-sm px-3 py-1 rounded-md transition-all duration-200 ease-in-out bg-secondary hover:bg-terciary text-white/60 hover:text-white`}
+                className={`border border-borderColor text-sm px-3 py-1 rounded-md transition-all duration-200 ease-in-out bg-secondary hover:bg-terciary text-white hover:text-white`}
                 onClick={() => setPage(page + 1)}
               >
                 Next
               </button>
-              <span className="text-sm text-white/60">
-                {page} of {Math.ceil(total ?? 1 / limit)}
-              </span>
             </div>
           </div>
         </div>
 
-        <div className="col-span-12 lg:col-span-4 row-span-2 bg-primary p-6 rounded-lg h-full border border-borderColor">
+        <div className="col-span-12 lg:col-span-4 row-span-3 bg-secondary p-6 rounded-lg h-full border border-borderColor">
           <div className="flex h-full min-h-0 flex-col gap-4 overflow-auto">
             <div className="flex flex-col gap-2">
-              <h2 className="text-2xl font-bold">Something</h2>
+              <div className="flex items-center gap-2">
+                <img
+                  src={info.image_uri}
+                  alt={info.name}
+                  className="w-[100px] h-[100px] rounded-full object-cover aspect-square"
+                />
+                <div className="flex flex-col">
+                  <h2 className="text-2xl font-medium">{info.name}</h2>
+                  <p className="text-sm text-white/60">{info.symbol}</p>
+                  <p className="text-sm text-white/60">{info.description}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
