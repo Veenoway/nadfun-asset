@@ -62,7 +62,7 @@ async function getPageData(address: string): Promise<PageData | null> {
   }
 }
 
-export default async function Page({ params }: { params: { address: string } }) {
+export default async function Page({ params }: { params: Promise<{ address: string }> }) {
   const { address } = await params;
   const data = await getPageData(address);
 
