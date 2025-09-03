@@ -1,4 +1,4 @@
-import { isAddress } from 'viem';
+import { formatEther, isAddress } from 'viem';
 
 /**
  * Convert Unix timestamp to relative time string
@@ -41,12 +41,63 @@ export function formatRelativeTime(timestamp: number): string {
   return `${years}y ago`;
 }
 
+/**
+ * Format numbers with K, M, B suffixes for better readability
+ * @param value - Number or string to format
+ * @param decimals - Number of decimal places to show (default: 1)
+ * @returns Formatted string (e.g., "1K", "1.5M", "2.3B")
+ */
+export function formatNumber(value: number | string, decimals: number = 1): string {
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+
+  if (isNaN(num)) return '0';
+  if (num === 0) return '0';
+
+  const absNum = Math.abs(num);
+  const sign = num < 0 ? '-' : '';
+
+  if (absNum >= 1e12) {
+    return `${sign}${(absNum / 1e12).toFixed(decimals)}T`;
+  }
+
+  if (absNum >= 1e9) {
+    return `${sign}${(absNum / 1e9).toFixed(decimals)}B`;
+  }
+
+  if (absNum >= 1e6) {
+    return `${sign}${(absNum / 1e6).toFixed(decimals)}M`;
+  }
+
+  if (absNum >= 1e3) {
+    return `${sign}${(absNum / 1e3).toFixed(decimals)}K`;
+  }
+
+  return `${sign}${absNum.toFixed(decimals)}`;
+}
+
 export function formatMarketCap(marketCap: string): number | string {
   if (!marketCap) {
     return '0';
   }
   const val = marketCap.split('.')[0];
   return Number(val) / 10 ** 18;
+}
+
+export function formatTokenBalance(balance: string): string {
+  const fromWei = formatEther(BigInt(balance));
+  const fromDecimals = fromWei.split('.')[0];
+  return fromDecimals;
+}
+
+/**
+ * Format token balance for display with K, M, B suffixes
+ * @param balance - Token balance in wei (string)
+ * @returns Formatted balance string (e.g., "1.5K", "2.3M")
+ */
+export function formatTokenBalanceDisplay(balance: string): string {
+  const fromWei = formatEther(BigInt(balance));
+  const fromDecimals = fromWei.split('.')[0];
+  return formatNumber(fromDecimals);
 }
 
 export function formatNickname(nickname: string): string {

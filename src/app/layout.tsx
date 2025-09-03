@@ -25,7 +25,7 @@ export default async function RootLayout({
   const cookies = (await headers()).get('cookie');
   return (
     <html lang="en-US">
-      <body className={`${poppins} bg-black`}>
+      <body className={`${poppins} bg-black/90`}>
         <ContextProvider cookies={cookies}>
           <QueryProvider>
             <Header />

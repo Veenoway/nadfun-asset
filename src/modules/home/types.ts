@@ -253,6 +253,7 @@ export interface TokenInfoResponse {
   is_listing?: boolean;
   created_at: number;
   market_cap?: string;
+  token_id?: string;
 }
 
 // Token Chart Response
