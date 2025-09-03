@@ -64,8 +64,8 @@ export function InfiniteTokenSelector({ tokens, speed = 80, className, onCompare
     <div
       ref={containerRef}
       className={cn(
-        'relative w-full overflow-hidden select-none mb-4 group',
-        'border border-white/10 rounded-lg bg-primary/20',
+        'relative w-full overflow-hidden select-none mb-4 group text-white',
+        'border-b border-t border-white bg-primary/20',
         className
       )}
       onMouseEnter={() => setPaused(true)}
@@ -119,7 +119,7 @@ const TokenItem = ({ token, onCompare }: TokenItemProps) => {
       type="button"
       className={cn(
         'group/item flex items-center gap-2 px-2 py-1 my-1.5 mx-1 rounded-md',
-        'bg-terciary border border-borderColor hover:bg-quaternary',
+        ' border border-borderColor hover:bg-quaternary',
         'shadow-sm hover:shadow transition-colors',
         selected && 'bg-quaternary'
       )}

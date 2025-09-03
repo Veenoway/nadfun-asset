@@ -127,7 +127,13 @@ export interface AccountInfo {
   following_count: number;
 }
 
+export interface KingOfTheHillResponse {
+  token_info: TokenInfoResponse;
+  account_info: AccountInfo;
+}
+
 export interface OrderTokenResponse {
+  king_of_the_hill: KingOfTheHillResponse;
   order_type: string;
   order_token: Array<{
     token_info: {
@@ -246,6 +252,8 @@ export interface TokenInfoResponse {
   description?: string;
   is_listing?: boolean;
   created_at: number;
+  market_cap?: string;
+  token_id?: string;
 }
 
 // Token Chart Response
