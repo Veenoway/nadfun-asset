@@ -2,16 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const BASE_URL = process.env.NEXT_PUBLIC_NAD_API_BASE ?? 'https://testnet-v3-api.nad.fun';
 
-export async function GET(req: NextRequest, { params }: { params: { address: string } }) {
+export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
 
-  const chartUrl = `${BASE_URL}/trade/chart/${params?.address}?${searchParams.toString()}`;
+  const address = searchParams.get('address');
+
+  if (!address) {
+    return NextResponse.json({ error: 'Address parameter is required' }, { status: 400 });
+  }
+
+  const chartUrl = `${BASE_URL}/trade/chart/${address}?${searchParams.toString()}`;
   const chartResponse = await fetch(chartUrl, {
     cache: 'no-store',
     headers: { accept: 'application/json' },
   });
 
-  const tokenUrl = `${BASE_URL}/search/${params?.address}`;
+  const tokenUrl = `${BASE_URL}/search/${address}`;
   const tokenResponse = await fetch(tokenUrl, {
     cache: 'no-store',
     headers: { accept: 'application/json' },
