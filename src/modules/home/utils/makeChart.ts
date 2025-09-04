@@ -11,7 +11,8 @@ export const makeChart = (startPrice: number, seedInit = 1, volatilityPct = 0.05
 
   let price = startPrice;
   let seed = seedInit;
-  const points: ChartPoint[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const points: any[] = [];
 
   const nextRand = () => {
     seed = (seed * 9301 + 49297) % 233280;
