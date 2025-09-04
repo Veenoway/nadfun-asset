@@ -120,7 +120,7 @@ export async function getChart(
     countback: '300',
   });
 
-  const res = await fetch(`/api/chart/${params.address}?${qs.toString()}`, {
+  const res = await fetch(`/api/chart?${qs.toString()}`, {
     cache: 'no-store',
     signal: opts?.signal,
   });

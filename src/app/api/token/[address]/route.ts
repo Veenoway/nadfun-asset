@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const BASE_URL = process.env.NEXT_PUBLIC_NAD_API_BASE ?? 'https://testnet-v3-api.nad.fun';
 
-export async function GET(req: NextRequest, { params }: { params: { address: string } }) {
-  const url = `${BASE_URL}/search/${params?.address}`;
+export async function GET(req: NextRequest, { params }: { params: Promise<{ address: string }> }) {
+  const { address } = await params;
+  const url = `${BASE_URL}/search/${address}`;
 
   const upstream = await fetch(url, {
     cache: 'no-store',
