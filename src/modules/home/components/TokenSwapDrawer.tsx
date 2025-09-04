@@ -349,7 +349,7 @@ export const TokenSwapDrawer = ({ children }: TokenSwapDrawerProps) => {
                     <div key={token.symbol} className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-black/60 lowercase">
-                          {token.symbol.toLowerCase()} to receive
+                          {token?.symbol?.toLowerCase()} to receive
                         </span>
                         <button
                           onClick={() => {

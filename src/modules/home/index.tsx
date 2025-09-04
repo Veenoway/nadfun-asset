@@ -13,6 +13,7 @@ import { TokenModal } from './components/TokenModal';
 import { AddressRow, Asset, DataType } from './types';
 import { makeChart } from './utils/makeChart';
 import { formatAmount } from './utils/number';
+import { TokenSwapDrawer } from './components/TokenSwapDrawer';
 
 const lineConfigs = [
   {
@@ -72,7 +73,7 @@ export default function Home({ defaultSelectedTokens }: { defaultSelectedTokens:
   }));
 
   return (
-    <main className="max-w-screen-2xl mx-auto p-8 pt-0 w-full">
+    <main className="max-w-screen-2xl mx-auto p-8 pt-0 w-full text-white">
       <InfiniteTokenSelector tokens={assets || []} />
       <section
         className="grid grid-cols-12 grid-flow-dense gap-4 min-h-screen
@@ -124,11 +125,11 @@ export default function Home({ defaultSelectedTokens }: { defaultSelectedTokens:
         <div className="col-span-12 lg:col-span-4 row-span-3 bg-secondary p-6 rounded-lg h-full border border-borderColor">
           <div className="flex h-full min-h-0 flex-col gap-4 overflow-auto">
             <div className="flex flex-col gap-2">
-              {/* <TokenSwapDrawer>
+              <TokenSwapDrawer>
                 <button className="w-full bg-brandColor text-white px-4 py-3 rounded-md hover:bg-brandColor/80 transition-colors">
                   Open Swap Interface
                 </button>
-              </TokenSwapDrawer> */}
+              </TokenSwapDrawer>
               <TokenBalances />
             </div>
           </div>
