@@ -1,19 +1,20 @@
-import { Header } from "@/layouts/header";
-import ContextProvider from "@/lib/wagmi/provider";
-import type { Metadata } from "next";
-import { Bebas_Neue } from "next/font/google";
-import { headers } from "next/headers";
-import "./globals.css";
+import { Header } from '@/layouts/header';
+import QueryProvider from '@/lib/react-query';
+import ContextProvider from '@/lib/wagmi/provider';
+import type { Metadata } from 'next';
+import { Bebas_Neue } from 'next/font/google';
+import { headers } from 'next/headers';
+import './globals.css';
 
 const poppins = Bebas_Neue({
-  variable: "--font-beba",
-  subsets: ["latin"],
-  weight: "400",
+  variable: '--font-beba',
+  subsets: ['latin'],
+  weight: '400',
 });
 
 export const metadata: Metadata = {
-  title: "Tentacle Of Beholdak | Mint",
-  description: "Mint your Tentacle Of Beholdak NFTs on Monad testnet.",
+  title: 'Nad.fun',
+  description: 'Nad.fun',
 };
 
 export default async function RootLayout({
@@ -21,14 +22,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookies = (await headers()).get("cookie");
+  const cookies = (await headers()).get('cookie');
   return (
     <html lang="en-US">
-      <body className={`${poppins} `}>
-        {/* <Analytics /> */}
+      <body className={`${poppins} bg-[#0b0b0b]`}>
         <ContextProvider cookies={cookies}>
-          <Header />
-          {children}
+          <QueryProvider>
+            <Header />
+            {children}
+          </QueryProvider>
         </ContextProvider>
       </body>
     </html>

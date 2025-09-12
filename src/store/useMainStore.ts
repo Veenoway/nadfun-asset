@@ -1,11 +1,16 @@
-import { create } from "zustand";
+import { Asset } from '@/modules/home/types';
+import { create } from 'zustand';
 
 type CounterState = {
-  test: string;
-  setTest: (test: string) => void;
+  tokens: Asset[];
+  setTokens: (assets: Asset[]) => void;
+  selectedTokens: Asset[];
+  setSelectedTokens: (selectedTokens: Asset[]) => void;
 };
 
 export const useMainStore = create<CounterState>()((set) => ({
-  test: "",
-  setTest: (test: string) => set({ test }),
+  tokens: [],
+  setTokens: (tokens: Asset[]) => set({ tokens }),
+  selectedTokens: [],
+  setSelectedTokens: (selectedTokens: Asset[]) => set({ selectedTokens }),
 }));
