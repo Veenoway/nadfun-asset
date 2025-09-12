@@ -1,9 +1,9 @@
+import { useUserTokenBalances } from '@/hooks/useTokens';
+import { formatMarketCap, formatNickname, formatRelativeTime } from '@/utils/helpers';
 import Image from 'next/image';
 import { useState } from 'react';
-import { formatMarketCap, formatNickname, formatRelativeTime } from '@/utils/helpers';
-import { OrderTokenResponse } from '../types';
-import { useUserTokenBalances } from '@/hooks/useTokens';
 import { useAccount } from 'wagmi';
+import { OrderTokenResponse } from '../types';
 
 interface RecentTokensProps {
   tokensByCreationTime?: OrderTokenResponse;
@@ -20,14 +20,13 @@ const RecentTokens = ({ tokensByCreationTime, handleTokenSelect }: RecentTokensP
   const { data: userTokens } = useUserTokenBalances(address);
 
   return (
-    <div className="w-1/4 space-y-4 p-4 rounded-lg tokens">
-      {/* Tab Headers */}
-      <div className="flex border-b border-gray-600">
+    <div className="w-full space-y-4 p-2 pt-1 mr-2 rounded tokens bg-secondary border border-borderColor">
+      <div className="flex border-b border-white/10">
         <button
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             activeTab === 'recent'
-              ? 'text-blue-400 border-b-2 border-blue-400'
-              : 'text-gray-400 hover:text-white'
+              ? 'text-white border-b-2 border-white'
+              : 'text-white/60 hover:text-white'
           }`}
           onClick={() => setActiveTab('recent')}
         >
@@ -36,8 +35,8 @@ const RecentTokens = ({ tokensByCreationTime, handleTokenSelect }: RecentTokensP
         <button
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             activeTab === 'my-tokens'
-              ? 'text-blue-400 border-b-2 border-blue-400'
-              : 'text-gray-400 hover:text-white'
+              ? 'text-white border-b-2 border-white'
+              : 'text-white/60 hover:text-white'
           }`}
           onClick={() => setActiveTab('my-tokens')}
         >
@@ -45,90 +44,57 @@ const RecentTokens = ({ tokensByCreationTime, handleTokenSelect }: RecentTokensP
         </button>
       </div>
 
-      <div className="max-h-[850px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300">
-        {/* Tab Content */}
+      <div className="max-h-[68vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300 min-w-[300px]">
         {activeTab === 'recent' && (
-          <div className="space-y-4">
-            {/* King of the Hill Token */}
-            <div
-              className="flex items-center gap-2 rounded-lg border border-purple-300/80 bg-[#333333] cursor-pointer hover:bg-[#444444] transition-colors"
-              onClick={() =>
-                handleTokenSelect(
-                  tokensByCreationTime?.king_of_the_hill as OrderTokenResponse['king_of_the_hill'],
-                  'recent'
-                )
-              }
-            >
-              {tokensByCreationTime?.king_of_the_hill.token_info.image_uri && (
-                <div className="w-16 h-16">
-                  <Image
-                    src={tokensByCreationTime?.king_of_the_hill.token_info.image_uri}
-                    alt={tokensByCreationTime?.king_of_the_hill.token_info.name}
-                    width={100}
-                    height={100}
-                    className="w-full h-full object-cover rounded-l-lg"
-                  />
-                </div>
-              )}
-              <div className="w-full p-0.5">
-                <div className="flex justify-between items-center text-xs w-full pr-2">
-                  <p>
-                    {formatRelativeTime(
-                      Number(tokensByCreationTime?.king_of_the_hill.token_info.created_at)
-                    )}
-                  </p>
-                  <p>
-                    {formatNickname(
-                      tokensByCreationTime?.king_of_the_hill.account_info.nickname || ''
-                    )}
-                  </p>
-                </div>
-                <div className="text-sm flex items-center gap-4">
-                  <p>{tokensByCreationTime?.king_of_the_hill.token_info.name}</p>
-                  <p>{tokensByCreationTime?.king_of_the_hill.token_info.symbol}</p>
-                </div>
-                {tokensByCreationTime?.king_of_the_hill.token_info.market_cap && (
-                  <p className="text-xs">
-                    Mkt. Cap:{' '}
-                    {formatMarketCap(tokensByCreationTime?.king_of_the_hill.token_info.market_cap)}{' '}
-                    MON
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Other Tokens */}
+          <div className="space-y-2">
             {tokensByCreationTime?.order_token.map((token) => (
               <div
                 key={token.token_info.token_id}
-                className="flex items-center gap-2 rounded-lg border border-purple-300/80 bg-[#333333] cursor-pointer hover:bg-[#444444] transition-colors shadow-md shadow-purple-300/20"
+                className="flex items-center rounded border border-borderColor bg-quaternary/20 cursor-pointer hover:border-white/15 hover:bg-quaternary transition-colors"
                 onClick={() => handleTokenSelect(token, 'recent')}
               >
-                {token.token_info.image_uri && (
-                  <div className="w-16 h-16">
-                    <Image
-                      src={token.token_info.image_uri}
-                      alt={token.token_info.name}
-                      width={100}
-                      height={100}
-                      className="w-full h-full object-cover rounded-l-lg"
-                    />
-                  </div>
-                )}
-                <div className="w-full p-0.5">
-                  <div className="flex justify-between items-center text-xs w-full pr-2">
-                    <p>{formatRelativeTime(Number(token.token_info.created_at))}</p>
-                    <p>{formatNickname(token.account_info.nickname || '')}</p>
-                  </div>
-                  <div className="text-sm flex items-center gap-4">
-                    <p>{token.token_info.name}</p>
-                    <p>{token.token_info.symbol}</p>
-                  </div>
-                  {token.token_info.market_cap && (
-                    <p className="text-xs">
-                      Mkt. Cap: {formatMarketCap(token.token_info.market_cap)} MON
-                    </p>
+                <div className="w-full flex items-center">
+                  {token.token_info.image_uri && (
+                    <div className="w-auto h-full ml-2">
+                      <img
+                        src={token.token_info.image_uri}
+                        alt={token.token_info.name}
+                        width={80}
+                        height={80}
+                        className="min-w-[70px] h-[70px] object-cover rounded-full aspect-square w-fit rounded border border-borderColor"
+                      />
+                    </div>
                   )}
+                  <div className="p-3 w-full">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-[10px] text-white bg-quaternary px-1 rounded">
+                        {formatRelativeTime(Number(token.token_info.created_at))}
+                      </span>
+                      <span className="text-[10px] text-brandColor font-normal">
+                        by {formatNickname(token.account_info.nickname || '')}
+                      </span>
+                    </div>
+
+                    <div className="mb-2">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-sm font-medium text-white truncate">
+                          {token.token_info.name}
+                        </h3>
+                        <span className="text-xs text-white/70 -mb-0.5 uppercase">
+                          {token.token_info.symbol}
+                        </span>
+                      </div>
+                    </div>
+
+                    {token.token_info.market_cap && (
+                      <div className="flex items-center justify-between pt-2 border-t border-borderColor">
+                        <span className="text-xs text-white/60">Market Cap</span>
+                        <span className="text-xs font-semibold text-white">
+                          {formatMarketCap(token.token_info.market_cap)} MON
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -136,7 +102,7 @@ const RecentTokens = ({ tokensByCreationTime, handleTokenSelect }: RecentTokensP
         )}
 
         {activeTab === 'my-tokens' && (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {!address ? (
               <div className="text-center text-gray-400 py-8">
                 <p>Connect your wallet to view your tokens</p>
@@ -146,7 +112,7 @@ const RecentTokens = ({ tokensByCreationTime, handleTokenSelect }: RecentTokensP
               userTokens.tokens.map((token: any) => (
                 <div
                   key={token.token_info.token_id}
-                  className="flex items-center gap-2 rounded-lg border border-purple-300/80 bg-[#333333] cursor-pointer hover:bg-[#444444] transition-colors shadow-md shadow-purple-300/20"
+                  className="flex items-center gap-2 rounded border border-borderColor bg-secondary cursor-pointer hover:bg-terciary transition-colors"
                   onClick={() => handleTokenSelect(token, 'my-tokens')}
                 >
                   {token.token_info.image_uri && (

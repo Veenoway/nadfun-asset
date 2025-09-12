@@ -2,13 +2,12 @@
 
 import { useTokensByCreationTime, useTokensByMarketCap } from '@/hooks/useTokens';
 import { useTradeHistoryOne } from '@/hooks/useTradeHistory';
-import { InfiniteTokenSelector } from '@/modules/home/components/InfiniteTokenSelector';
 import RecentTokens from '@/modules/home/components/RecentTokens';
 import { isAddress } from 'viem';
 
-import { useEffect, useMemo, useState } from 'react';
-import { formatAmount } from '@/modules/home/utils/number';
 import BuySell from '@/modules/home/components/BuySell';
+import { formatAmount } from '@/modules/home/utils/number';
+import { useEffect, useMemo, useState } from 'react';
 
 interface SelectedToken {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -113,15 +112,9 @@ export default function HomePage() {
 
   return (
     <section>
-      <InfiniteTokenSelector tokens={assets || []} />
-      <div className="flex justify-between w-full text-white px-8 gap-4">
-        <RecentTokens
-          tokensByCreationTime={tokensByCreationTime}
-          handleTokenSelect={handleTokenSelect}
-        />
-
+      <div className="flex justify-between text-white px-8 max-w-screen-2xl pt-10 mx-auto w-[95%]">
         {/* Tabs Section */}
-        <div className="w-3/4 p-4 rounded-lg">
+        <div className="w-full rounded-lg">
           {selectedTokens.length === 0 ? (
             <div className="text-center text-gray-400 py-8">
               <p>Select a token from the left panel to view details</p>
@@ -129,14 +122,14 @@ export default function HomePage() {
           ) : (
             <>
               {/* Tab Headers */}
-              <div className="flex border-gray-600">
+              <div className="flex border-gray-600 ml-3.5 mb-3">
                 {selectedTokens.map((selectedToken) => (
                   <div
                     key={selectedToken.tabId}
-                    className={`flex items-center gap-2 px-4 py-2 cursor-pointer transition-colors ${
+                    className={`flex items-center gap-2 px-4 py-2  cursor-pointer transition-colors ${
                       activeTab === selectedToken.tabId
-                        ? ' text-blue-400 rounded-t-md bg-quaternary/30'
-                        : 'border-transparent text-gray-400 hover:text-white'
+                        ? ' text-white rounded-t-md border-b-2 border-brandColor'
+                        : 'text-white/60 hover:text-white border-b-2 border-white/10'
                     }`}
                     onClick={() => setActiveTab(selectedToken.tabId)}
                   >
@@ -162,19 +155,16 @@ export default function HomePage() {
                   key={selectedToken.tabId}
                   className={`${activeTab === selectedToken.tabId ? 'block' : 'hidden'}`}
                 >
-                  <div className="flex gap-4 bg-quaternary/30">
+                  <div className="flex ">
                     {/* Chart and Order History */}
-                    <div className="w-2/3">
+                    <div className="w-full">
                       <div className="space-y-4">
-                        <div className="p-4 rounded-lg">
-                          <h5 className="font-semibold mb-2">Chart</h5>
-                          <div className="h-80 bg-gray-800 rounded flex items-center justify-center">
+                        <div className="mx-4 border border-borderColor rounded ">
+                          <div className="h-[450px] bg-secondary rounded flex items-center justify-center">
                             CHART
                           </div>
                         </div>
                         <div className="px-4 rounded-lg">
-                          <h5 className="font-semibold mb-2">Order History</h5>
-
                           <div className="col-span-12 lg:col-span-8 row-span-3 rounded-lg h-full">
                             <div className="flex justify-between items-center mb-4">
                               <div className="flex items-center gap-2">
@@ -221,22 +211,22 @@ export default function HomePage() {
                               className="overflow-auto w-full"
                               style={{ maxHeight: 'calc(100% - 95px)' }}
                             >
-                              <table className="w-full">
+                              <table className="w-full text-sm text-normal text-white/60">
                                 <thead>
                                   <tr>
-                                    <th className="text-left border-y border-borderColor py-3 pl-3">
+                                    <th className="text-left border-y text-normal border-borderColor py-3 pl-3">
                                       Date
                                     </th>
-                                    <th className="text-left border-y border-borderColor py-3">
+                                    <th className="text-left border-y text-normal border-borderColor py-3">
                                       User
                                     </th>
-                                    <th className="text-right border-y border-borderColor py-3">
+                                    <th className="text-right border-y text-normal border-borderColor py-3">
                                       MON
                                     </th>
-                                    <th className="text-right border-y border-borderColor py-3">
+                                    <th className="text-right border-y text-normal border-borderColor py-3">
                                       Token Amount
                                     </th>
-                                    <th className="text-right border-y border-borderColor py-3 pr-3">
+                                    <th className="text-right border-y text-normal border-borderColor py-3 pr-3">
                                       Transaction Hash
                                     </th>
                                   </tr>
@@ -256,12 +246,12 @@ export default function HomePage() {
                                         key={
                                           trade._address + trade.created_at + trade.transaction_hash
                                         }
-                                        className="text-base"
+                                        className="text-sm"
                                       >
                                         <td className="text-left border-b border-borderColor pl-3">
                                           <div className="flex items-center gap-2">
                                             <div
-                                              className={`rounded-full font-medium text-xs px-2 py-0.5 ${
+                                              className={`rounded-full font-medium text-[10px] px-1.5 py-[1px] ${
                                                 trade.is_buy
                                                   ? 'bg-green-600/30 text-green-500'
                                                   : 'bg-red-600/30 text-red-500'
@@ -280,7 +270,7 @@ export default function HomePage() {
                                                   }
                                                 )}
                                               </p>
-                                              <p className="text-white text-sm">
+                                              <p className="text-white text-xs">
                                                 {new Date(trade.created_at * 1000).toLocaleString(
                                                   'en-US',
                                                   {
@@ -298,7 +288,7 @@ export default function HomePage() {
                                             <img
                                               src={trade.account_info.image_uri}
                                               alt={trade.account_info.nickname}
-                                              className="w-6 h-6 rounded-full"
+                                              className="w-5 h-5 rounded-full"
                                             />
                                             {isAddress(trade.account_info.nickname)
                                               ? trade.account_info.nickname.slice(0, 3) +
@@ -363,10 +353,16 @@ export default function HomePage() {
                     </div>
 
                     {/* Buy/Sell Actions */}
-                    <div className="w-1/3 border border-borderColor p-4 rounded-lg">
-                      <BuySell
-                        selectedToken={selectedToken.token}
-                        isFromMyTokens={selectedToken.source === 'my-tokens'}
+                    <div className="min-w-[400px] h-fit space-y-3">
+                      <div className="bg-secondary border border-borderColor rounded pb-4">
+                        <BuySell
+                          selectedToken={selectedToken.token}
+                          isFromMyTokens={selectedToken.source === 'my-tokens'}
+                        />
+                      </div>
+                      <RecentTokens
+                        tokensByCreationTime={tokensByCreationTime}
+                        handleTokenSelect={handleTokenSelect}
                       />
                     </div>
                   </div>

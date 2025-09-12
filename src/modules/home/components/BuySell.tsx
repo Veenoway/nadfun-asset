@@ -1,11 +1,11 @@
-import { formatEther } from 'viem';
-import { cn } from '@/utils/cn';
-import { useEffect, useState } from 'react';
-import { useAccount, useBalance } from 'wagmi';
 import { useNadFunTrading } from '@/hooks/useNadFunTrading';
-import { KingOfTheHillResponse } from '../types';
 import { useUserTokenBalances } from '@/hooks/useTokens';
-import { formatTokenBalanceDisplay } from '@/utils/helpers';
+import { cn } from '@/utils/cn';
+import { formatNumber, formatTokenBalanceDisplay } from '@/utils/helpers';
+import { useEffect, useState } from 'react';
+import { formatEther } from 'viem';
+import { useAccount, useBalance } from 'wagmi';
+import { KingOfTheHillResponse } from '../types';
 
 interface BuySellProps {
   selectedToken: KingOfTheHillResponse;
@@ -145,7 +145,7 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
   return (
     <div className="text-white">
       <div className="flex-1 overflow-y-auto">
-        <div className="p-6 space-y-6">
+        <div className="p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="flex border border-borderColor rounded-md overflow-hidden bg-secondary">
@@ -154,11 +154,11 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
                   className={cn(
                     'px-3 py-1 text-xs font-medium transition-colors',
                     mode === 'buy'
-                      ? 'bg-brandColor text-white'
+                      ? 'bg-green-600/30 text-green-500'
                       : 'bg-secondary text-white/60 hover:text-white'
                   )}
                 >
-                  Buy with MON
+                  Buy
                 </button>
                 <button
                   onClick={() => setMode('sell')}
@@ -166,24 +166,24 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
                   className={cn(
                     'px-3 py-1 text-xs font-medium transition-colors',
                     mode === 'sell'
-                      ? 'bg-brandColor text-white'
+                      ? 'bg-red-600/30 text-red-500'
                       : 'bg-secondary text-white/60 hover:text-white',
                     !userOwnsToken && 'opacity-50 cursor-not-allowed'
                   )}
                 >
-                  Sell for MON
+                  Sell
                 </button>
               </div>
             </div>
           </div>
 
           {mode === 'buy' ? (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">MON to spend</span>
-                <span className="text-xs ">Available: {availableBalance.toFixed(4)} MON</span>
+                <span className="text-sm text-white/60 font-light">Balance</span>
+                <span className="text-sm text-white">{formatNumber(availableBalance)} MON</span>
               </div>
-              <div className="border border-borderColor rounded-lg p-4 bg-secondary">
+              <div className="border border-borderColor rounded px-3 py-2 bg-quaternary/70">
                 <div className="flex items-center justify-between">
                   <input
                     type="text"
@@ -194,7 +194,7 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
                         setFromAmount(value);
                       }
                     }}
-                    className="text-lg font-mono text-white bg-transparent outline-none flex-1"
+                    className="text-base font-mono text-white bg-transparent outline-none flex-1"
                     placeholder="0.0"
                   />
                   {/* <div className="flex items-center gap-2">
@@ -233,7 +233,7 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
                 ))}
               </div>
 
-              <div className="border border-borderColor rounded-lg p-4 bg-secondary">
+              <div className="border border-borderColor rounded p-4 bg-secondary">
                 <div className="flex items-center justify-between">
                   <input
                     type="text"
@@ -273,7 +273,7 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-white lowercase">MON to receive</span>
               </div>
-              <div className="border border-borderColor rounded-lg p-4 bg-secondary">
+              <div className="border border-borderColor rounded p-4 bg-secondary">
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-mono text-white">
                     {Number(amountOut).toFixed(4)}
@@ -312,7 +312,7 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
                     </button>
                   </div>
 
-                  <div className="border border-borderColor rounded-lg p-4 bg-secondary">
+                  <div className="border border-borderColor rounded p-4 bg-secondary">
                     <div className="flex items-center justify-between">
                       <input
                         type="text"
@@ -331,13 +331,13 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
               ))}
 
             {tradingError && (
-              <div className="p-4 bg-red-100 border border-red-300 rounded-lg">
+              <div className="p-4 bg-red-100 border border-red-300 rounded">
                 <p className="text-red-700 text-sm">{tradingError}</p>
               </div>
             )}
 
             {mode === 'buy' && selectedTokens.length >= 2 && (
-              <div className="space-y-3 p-4 bg-secondary rounded-lg border border-borderColor">
+              <div className="space-y-3 p-4 bg-secondary rounded border border-borderColor">
                 <h4 className="text-sm font-medium text-white/60">Exchange Rates</h4>
                 <div className="space-y-2 text-sm">
                   {selectedTokens.map((token) => {
@@ -375,11 +375,11 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
         </div>
       </div>
 
-      <div className="p-6 border-t border-borderColor">
+      <div className="px-4">
         <button
           onClick={handleSwap}
           disabled={isTradingLoading || isListed || isLocked}
-          className="w-full bg-brandColor hover:bg-brandColor/80 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-4 text-lg font-bold rounded-lg transition-colors"
+          className="w-full bg-brandColor hover:bg-brandColor/80 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 text-sm font-medium rounded transition-colors"
         >
           {isTradingLoading ? 'PROCESSING...' : mode === 'buy' ? 'BUY TOKENS' : 'SELL TOKENS'}
         </button>

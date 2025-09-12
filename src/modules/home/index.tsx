@@ -10,10 +10,10 @@ import { InfiniteTokenSelector } from './components/InfiniteTokenSelector';
 import { MultiLineChart } from './components/MultiLineChart';
 import { TokenBalances } from './components/TokenBalances';
 import { TokenModal } from './components/TokenModal';
+import { TokenSwapDrawer } from './components/TokenSwapDrawer';
 import { AddressRow, Asset, DataType } from './types';
 import { makeChart } from './utils/makeChart';
 import { formatAmount } from './utils/number';
-import { TokenSwapDrawer } from './components/TokenSwapDrawer';
 
 const lineConfigs = [
   {

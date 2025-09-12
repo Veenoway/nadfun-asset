@@ -23,7 +23,7 @@
 
 body {
   color: var(--foreground);
-  background: var(--background);
+  background: #010101;
 }
 
 .no-scrollbar::-webkit-scrollbar {
