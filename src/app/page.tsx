@@ -4,9 +4,11 @@ import { useTokensByCreationTime } from '@/hooks/useTokens';
 import { formatNickname } from '@/lib/helpers';
 import { useEffect, useState } from 'react';
 import { BuySell, RecentTokens, TradeHistory } from '@/components/home';
-import { Copy, ExternalLink } from 'lucide-react';
-import Link from 'next/link';
+import { Copy } from 'lucide-react';
 import { KingOfTheHill } from '@/lib/types';
+import { Button } from '@/components/ui';
+import { Parent } from '@/components/analytics/Parent';
+import { Drawer, DrawerTrigger, DrawerContent } from '@/components/ui/drawer';
 
 export interface SelectedToken {
   token: KingOfTheHill;
@@ -150,14 +152,24 @@ export default function HomePage() {
                               Created by:{' '}
                               {formatNickname(selectedToken.token.account_info?.nickname)}
                             </p>
-                            <Link
-                              href={`/analytics/${selectedToken.token.token_info.token_id}`}
-                              target="_blank"
-                              className="flex items-center gap-1 text-gray-500 hover:text-brandColor"
-                            >
-                              <span className="text-xs text-gray-500">View analytics</span>
-                              <ExternalLink size={12} className="cursor-pointer text-gray-500" />
-                            </Link>
+
+                            <Drawer>
+                              <DrawerTrigger asChild>
+                                <Button
+                                  asChild
+                                  variant="filter"
+                                  onClick={() =>
+                                    console.log(selectedToken.token.token_info.token_id)
+                                  }
+                                  className="flex items-center gap-1 bg-secondary border border-borderColor"
+                                >
+                                  <span className="text-xs text-white">View analytics</span>
+                                </Button>
+                              </DrawerTrigger>
+                              <DrawerContent className="border pointer-events-none outline-[0.5px] outline-brandColor/50">
+                                <Parent tokenAddress={selectedToken.token.token_info.token_id!} />
+                              </DrawerContent>
+                            </Drawer>
                           </div>
                         </div>
                         <div className="mx-4 border border-borderColor rounded ">

@@ -14,9 +14,11 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.13",
+    "@radix-ui/react-toast": "^1.2.15",
     "@rainbow-me/rainbowkit": "^2.2.8",
     "@tanstack/react-query": "^5.87.1",
     "axios": "^1.11.0",
@@ -26,8 +28,10 @@
     "next": "15.5.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "recharts": "^3.2.0",
     "shadcn": "^3.2.1",
     "tailwind-merge": "^3.3.1",
+    "vaul": "^1.1.2",
     "viem": "2.x",
     "wagmi": "^2.16.9",
     "zustand": "^5.0.8"
@@ -40,6 +44,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
+    "eslint-plugin-unused-imports": "^4.2.0",
     "husky": "^8.0.0",
     "lightweight-charts": "^5.0.8",
     "lint-staged": "^16.1.6",
