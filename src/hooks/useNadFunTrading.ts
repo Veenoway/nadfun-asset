@@ -12,7 +12,7 @@ import {
   BONDING_CURVE_ABI,
   BONDING_CURVE_ROUTER_ABI,
   ERC20_PERMIT_ABI,
-} from '@/config/contracts';
+} from '@/lib/contracts';
 import { useState, useCallback } from 'react';
 
 export interface TradingParams {
@@ -44,11 +44,7 @@ interface PermitSignature {
   nonce: string;
 }
 
-export const useNadFunTrading = (
-  tokenAddress?: string,
-  amountIn?: string,
-  isSellMode?: boolean
-) => {
+const useNadFunTrading = (tokenAddress?: string, amountIn?: string, isSellMode?: boolean) => {
   const { address } = useAccount();
   const { data: balance } = useBalance({ address });
   const [isLoading, setIsLoading] = useState(false);
@@ -171,7 +167,7 @@ export const useNadFunTrading = (
         setIsLoading(false);
       }
     },
-    [address, isListed, isLocked, executeTrade]
+    [address, isListed, isLocked, executeTrade],
   );
 
   // Sell tokens using bonding curve with permit
@@ -204,7 +200,7 @@ export const useNadFunTrading = (
         // Create permit signature
         const permitDeadline = BigInt(Math.floor(Date.now() / 1000) + 300);
         const maxAllowance = BigInt(
-          '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+          '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
         );
 
         const permitData = {
@@ -291,7 +287,7 @@ export const useNadFunTrading = (
         setIsLoading(false);
       }
     },
-    [address, isListed, isLocked, executeTrade, signTypedDataAsync, tokenName, tokenNonce]
+    [address, isListed, isLocked, executeTrade, signTypedDataAsync, tokenName, tokenNonce],
   );
 
   // Get current trading state
@@ -322,3 +318,5 @@ export const useNadFunTrading = (
     balance: balance ? Number(formatEther(balance.value)) : 0,
   };
 };
+
+export { useNadFunTrading };

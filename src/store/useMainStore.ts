@@ -1,16 +1,16 @@
-import { Asset } from '@/modules/home/types';
+import { TokenInfo } from '@/lib/types';
 import { create } from 'zustand';
 
 type CounterState = {
-  tokens: Asset[];
-  setTokens: (assets: Asset[]) => void;
-  selectedTokens: Asset[];
-  setSelectedTokens: (selectedTokens: Asset[]) => void;
+  tokens: TokenInfo[];
+  setTokens: (assets: TokenInfo[]) => void;
+  selectedTokens: TokenInfo[];
+  setSelectedTokens: (selectedTokens: TokenInfo[]) => void;
 };
 
 export const useMainStore = create<CounterState>()((set) => ({
   tokens: [],
-  setTokens: (tokens: Asset[]) => set({ tokens }),
+  setTokens: (tokens: TokenInfo[]) => set({ tokens }),
   selectedTokens: [],
-  setSelectedTokens: (selectedTokens: Asset[]) => set({ selectedTokens }),
+  setSelectedTokens: (selectedTokens: TokenInfo[]) => set({ selectedTokens }),
 }));

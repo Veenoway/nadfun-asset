@@ -1,37 +1,27 @@
-import { Header } from '@/layouts/header';
-import QueryProvider from '@/lib/react-query';
-import ContextProvider from '@/lib/wagmi/provider';
 import type { Metadata } from 'next';
-import { Bebas_Neue } from 'next/font/google';
-import { headers } from 'next/headers';
+import { Inter } from 'next/font/google';
 import './globals.css';
+import { Providers } from './providers';
 
-const poppins = Bebas_Neue({
-  variable: '--font-beba',
+const inter = Inter({
+  variable: '--font-inter',
   subsets: ['latin'],
-  weight: '400',
 });
 
 export const metadata: Metadata = {
-  title: 'Nad.fun',
-  description: 'Nad.fun',
+  title: 'Nadfun+',
+  description: 'Nadfun+',
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookies = (await headers()).get('cookie');
   return (
-    <html lang="en-US">
-      <body className={`${poppins} bg-[#0b0b0b]`}>
-        <ContextProvider cookies={cookies}>
-          <QueryProvider>
-            <Header />
-            {children}
-          </QueryProvider>
-        </ContextProvider>
+    <html lang="en">
+      <body className={`${inter.variable} antialiased`}>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
