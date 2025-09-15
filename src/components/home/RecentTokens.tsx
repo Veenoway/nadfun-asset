@@ -1,3 +1,5 @@
+'use client';
+
 import { useUserTokenBalances } from '@/hooks/useTokens';
 import { formatMarketCap, formatNickname, formatRelativeTime } from '@/lib/helpers';
 import { useState } from 'react';

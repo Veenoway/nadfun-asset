@@ -1,3 +1,5 @@
+'use client';
+
 import { useNadFunTrading } from '@/hooks/useNadFunTrading';
 import { useUserTokenBalances } from '@/hooks/useTokens';
 import { cn } from '@/lib/utils';
