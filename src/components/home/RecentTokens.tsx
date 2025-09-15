@@ -1,6 +1,5 @@
 import { useUserTokenBalances } from '@/hooks/useTokens';
 import { formatMarketCap, formatNickname, formatRelativeTime } from '@/lib/helpers';
-import Image from 'next/image';
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { OrderTokenResponse } from '@/lib/types';

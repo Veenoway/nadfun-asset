@@ -1,6 +1,6 @@
 import { SelectedToken } from '@/app/page';
 import { useTradeHistoryOne } from '@/hooks';
-import { formatRelativeTime, formatMON, formatTokenBalance } from '@/lib/helpers';
+import { formatMON, formatTokenBalance } from '@/lib/helpers';
 import { ExternalLink } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { isAddress } from 'viem';

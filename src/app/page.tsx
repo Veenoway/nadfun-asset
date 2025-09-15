@@ -1,10 +1,9 @@
 'use client';
 
-import { useTokensByCreationTime, useTokensByMarketCap } from '@/hooks/useTokens';
-import { useTradeHistoryOne } from '@/hooks/useTradeHistory';
-import { formatMON, formatNickname, formatTokenBalance } from '@/lib/helpers';
-import { useEffect, useMemo, useState } from 'react';
-import { BuySell, RecentTokens, TokenChart, TradeHistory } from '@/components/home';
+import { useTokensByCreationTime } from '@/hooks/useTokens';
+import { formatNickname } from '@/lib/helpers';
+import { useEffect, useState } from 'react';
+import { BuySell, RecentTokens, TradeHistory } from '@/components/home';
 import { Copy, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { KingOfTheHill } from '@/lib/types';

@@ -1,8 +1,7 @@
 'use client';
 
 import { useTokenChart } from '@/hooks/useTokens';
-import { createChart, ColorType, CandlestickSeries, IChartApi } from 'lightweight-charts';
-import { Loader2 } from 'lucide-react';
+import { createChart, CandlestickSeries } from 'lightweight-charts';
 import { useEffect, useRef } from 'react';
 
 interface TokenChartProps {
@@ -68,14 +67,6 @@ export function TokenChart({ tokenAddress }: TokenChartProps) {
       chart.remove();
     };
   }, [chartData]);
-
-  // if (isLoading)
-  //   return (
-  //     <div className="flex justify-center items-center h-90">
-  //       <Loader2 size={32} className=" animate-spin" />
-  //     </div>
-  //   );
-  // if (error) return <div>Error loading chart</div>;
 
   return (
     <div className="w-full backdrop-blur-sm bg-black/20 border-[0.1px] border-borderLight/10 p-1 shadow-lg shadow-borderLighter/60">
