@@ -7,26 +7,22 @@ import { useEffect, useMemo, useState } from 'react';
 import { BuySell, RecentTokens, TokenChart, TradeHistory } from '@/components/home';
 import { Copy, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import { KingOfTheHill } from '@/lib/types';
 
 export interface SelectedToken {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  token: any;
+  token: KingOfTheHill;
   tabId: string;
   source: 'recent' | 'my-tokens';
 }
 
 export default function HomePage() {
-  const { data: tokens } = useTokensByMarketCap(1, 20);
   const { data: tokensByCreationTime } = useTokensByCreationTime(1, 20);
   const [selectedTokens, setSelectedTokens] = useState<SelectedToken[]>([]);
   const [activeTab, setActiveTab] = useState<string>('');
-  const [tradeType, setTradeType] = useState<'ALL' | 'BUY' | 'SELL'>('ALL');
-  const [direction, setDirection] = useState<'ASC' | 'DESC'>('DESC');
-  const [page, setPage] = useState(1);
-  const limit = 15;
 
   useEffect(() => {
     setSelectedTokens(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       tokensByCreationTime?.order_token.slice(0, 3).map((token: any) => ({
         token,
         tabId: `tab-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -36,27 +32,6 @@ export default function HomePage() {
   }, [tokensByCreationTime]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const assets = tokens?.order_token.map((token: any) => ({
-    logo: token.token_info.image_uri,
-    symbol: token.token_info.symbol,
-    name: token.token_info.name,
-    token_address: token.token_info.token_id,
-  }));
-
-  const { data } = useTradeHistoryOne(
-    selectedTokens.find((st) => st.tabId === activeTab)?.token.token_info.token_id || '',
-    page,
-    limit,
-    direction,
-    tradeType,
-  );
-
-  const total = useMemo(() => data?.total, [data]);
-  const trades = useMemo(() => data?.items, [data]);
-
-  // Handle token selection
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleTokenSelect = (token: any, source: 'recent' | 'my-tokens') => {
     // Check if token is already selected
     const isAlreadySelected = selectedTokens.some(
@@ -64,7 +39,6 @@ export default function HomePage() {
     );
 
     if (isAlreadySelected) {
-      // If already selected, just switch to that tab
       const existingTab = selectedTokens.find(
         (st) => st.token.token_info.token_id === token.token_info.token_id,
       );
@@ -74,9 +48,7 @@ export default function HomePage() {
       return;
     }
 
-    // Check if we already have 3 tabs
-    if (selectedTokens.length >= 3) {
-      // Remove the oldest tab (first one)
+    if (selectedTokens.length >= 6) {
       const newSelectedTokens = selectedTokens.slice(1);
       const newToken: SelectedToken = {
         token,
@@ -87,7 +59,6 @@ export default function HomePage() {
       setSelectedTokens(updatedTokens);
       setActiveTab(newToken.tabId);
     } else {
-      // Add new tab
       const newToken: SelectedToken = {
         token,
         tabId: `tab-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -99,12 +70,10 @@ export default function HomePage() {
     }
   };
 
-  // Handle tab removal
   const handleTabRemove = (tabId: string) => {
     const updatedTokens = selectedTokens.filter((st) => st.tabId !== tabId);
     setSelectedTokens(updatedTokens);
 
-    // If we removed the active tab, switch to the last remaining tab
     if (activeTab === tabId && updatedTokens.length > 0) {
       setActiveTab(updatedTokens[updatedTokens.length - 1].tabId);
     } else if (updatedTokens.length === 0) {
@@ -112,7 +81,6 @@ export default function HomePage() {
     }
   };
 
-  // Set first tab as active when tabs are first added
   useEffect(() => {
     if (selectedTokens.length > 0 && !activeTab) {
       setActiveTab(selectedTokens[0].tabId);
