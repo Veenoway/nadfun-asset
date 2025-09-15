@@ -1,7 +1,23 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {
+  /* config options here */
   images: {
-    domains: ['gateway.pinata.cloud', 'storage.nadapp.net'],
+    domains: [],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'gateway.pinata.cloud',
+      },
+      {
+        protocol: 'https',
+        hostname: 'storage.nadapp.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'pbs.twimg.com',
+      },
+    ],
   },
   async rewrites() {
     return [
@@ -10,24 +26,6 @@ const nextConfig = {
         destination: 'https://testnet-v3-api.nad.fun/:path*',
       },
     ];
-  },
-  webpack: (config: any) => {
-    config.module.rules.push({
-      test: /\.(ttf|woff|woff2|eot)$/,
-      use: {
-        loader: 'file-loader',
-        options: {
-          name: '[name].[ext]',
-          outputPath: 'static/fonts/',
-        },
-      },
-    });
-    return config;
-  },
-  eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
-    ignoreDuringBuilds: true,
   },
 };
 

@@ -1,8 +1,4 @@
-import {
-  MarketDataResponse,
-  OrderTokenResponse,
-  UserTokenBalancesResponse,
-} from '@/modules/home/types';
+import { MarketData, OrderTokenResponse, UserTokenBalancesResponse } from '@/lib/types';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import axios from 'axios';
 
@@ -10,10 +6,12 @@ import axios from 'axios';
 //https://testnet-v3-api.nad.fun/profile/hold-token/0xe329ce7EcB851c09948e5F507F1a6FfA40De055B?account_id=0xe329ce7EcB851c09948e5F507F1a6FfA40De055B&page=1&limit=10
 //https://testnet-v3-api.nad.fun/profile/swap-history/0xe329ce7EcB851c09948e5F507F1a6FfA40De055B?account_id=0xe329ce7EcB851c09948e5F507F1a6FfA40De055B&page=1&limit=10
 
+//https://testnet-v3-api.nad.fun/trade/chart/0x4c8503B32DbaFAE7ec645b397F716BCA47d2a9a1?resolution=1&from=0&to=1757525520&countback=300
+
 // Fetch tokens by creation time
-export const useTokensByCreationTime = (
+const useTokensByCreationTime = (
   page: number = 1,
-  limit: number = 20
+  limit: number = 20,
 ): UseQueryResult<OrderTokenResponse> => {
   return useQuery({
     queryKey: ['tokens', 'creation_time', page, limit],
@@ -29,7 +27,7 @@ export const useTokensByCreationTime = (
 };
 
 // Fetch tokens by market cap
-export const useTokensByMarketCap = (page: number = 1, limit: number = 10) => {
+const useTokensByMarketCap = (page: number = 1, limit: number = 10) => {
   return useQuery({
     queryKey: ['tokens', 'market_cap', page, limit],
     queryFn: async () => {
@@ -44,7 +42,7 @@ export const useTokensByMarketCap = (page: number = 1, limit: number = 10) => {
 };
 
 // Fetch token info
-export const useTokenInfo = (tokenAddress: string): UseQueryResult<MarketDataResponse> => {
+const useTokenInfo = (tokenAddress: string): UseQueryResult<MarketData> => {
   return useQuery({
     queryKey: ['token', 'info', tokenAddress],
     queryFn: async () => {
@@ -57,25 +55,41 @@ export const useTokenInfo = (tokenAddress: string): UseQueryResult<MarketDataRes
 };
 
 // Fetch token chart data
-export const useTokenChart = (
-  tokenAddress: string,
-  interval: '1m' | '5m' | '15m' | '30m' | '1h' | '4h' | '1d' | '1w' = '1h'
-) => {
+// In useTokens.ts
+const useTokenChart = (tokenAddress: string, resolution: number = 1, countback: number = 300) => {
+  const to = Math.floor(Date.now() / 1000);
+
   return useQuery({
-    queryKey: ['token', 'chart', tokenAddress, interval],
+    queryKey: ['token', 'chart', tokenAddress, resolution, to, countback],
     queryFn: async () => {
-      const response = await axios.get(`/api/nadfun/token/chart/${tokenAddress}`, {
-        params: { interval },
+      const response = await axios.get(`/api/nadfun/trade/chart/${tokenAddress}`, {
+        params: {
+          resolution,
+          from: 0,
+          to,
+          countback,
+        },
       });
-      return response.data;
+
+      // Format the data for the chart
+      const data = response.data;
+      return {
+        t: data.t || [], // timestamps
+        o: data.o || [], // open prices
+        h: data.h || [], // high prices
+        l: data.l || [], // low prices
+        c: data.c || [], // close prices
+        v: data.v || [], // volumes
+      };
     },
     enabled: !!tokenAddress,
-    staleTime: 1 * 60 * 1000,
+    staleTime: resolution * 1000,
+    refetchInterval: resolution * 1000,
   });
 };
 
 // Fetch multiple token prices at once
-export const useMultipleTokenPrices = (tokenAddresses: string[]) => {
+const useMultipleTokenPrices = (tokenAddresses: string[]) => {
   return useQuery({
     queryKey: ['tokens', 'prices', tokenAddresses],
     queryFn: async () => {
@@ -91,10 +105,13 @@ export const useMultipleTokenPrices = (tokenAddresses: string[]) => {
       });
 
       const results = await Promise.all(pricePromises);
-      return results.reduce((acc, { address, price }) => {
-        acc[address] = price;
-        return acc;
-      }, {} as Record<string, string | null>);
+      return results.reduce(
+        (acc, { address, price }) => {
+          acc[address] = price;
+          return acc;
+        },
+        {} as Record<string, string | null>,
+      );
     },
     enabled: tokenAddresses.length > 0 && tokenAddresses.some((addr) => !!addr),
     staleTime: 2 * 60 * 1000,
@@ -102,8 +119,8 @@ export const useMultipleTokenPrices = (tokenAddresses: string[]) => {
 };
 
 // Fetch user token balances
-export const useUserTokenBalances = (
-  accountAddress?: string
+const useUserTokenBalances = (
+  accountAddress?: string,
 ): UseQueryResult<UserTokenBalancesResponse> => {
   return useQuery({
     queryKey: ['user', 'token-balances', accountAddress],
@@ -111,7 +128,7 @@ export const useUserTokenBalances = (
       if (!accountAddress) return null;
       //profile/hold-token/0xe329ce7EcB851c09948e5F507F1a6FfA40De055B?account_id=0xe329ce7EcB851c09948e5F507F1a6FfA40De055B&page=1&limit=10
       const response = await axios.get(`/api/nadfun/profile/hold-token/${accountAddress}`, {
-        params: { account_id: accountAddress, page: 1, limit: 100 },
+        params: { account_id: accountAddress, page: 1, limit: 15 },
       });
       return response.data;
     },
@@ -119,4 +136,13 @@ export const useUserTokenBalances = (
     staleTime: 30 * 1000, // Refresh every 30 seconds
     gcTime: 5 * 60 * 1000,
   });
+};
+
+export {
+  useTokensByCreationTime,
+  useTokensByMarketCap,
+  useTokenInfo,
+  useTokenChart,
+  useMultipleTokenPrices,
+  useUserTokenBalances,
 };
