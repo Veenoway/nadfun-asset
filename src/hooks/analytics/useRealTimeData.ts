@@ -48,9 +48,14 @@ export const useRealTimeData = () => {
 
   // Connect to WebSocket on mount
   useEffect(() => {
+    // Only run in browser environment
+    if (!monadWebSocket) {
+      return;
+    }
+
     const connect = async () => {
       try {
-        await monadWebSocket.connect();
+        await monadWebSocket?.connect();
       } catch (error) {
         console.error('Failed to connect to WebSocket:', error);
       }
@@ -84,7 +89,7 @@ export const useRealTimeData = () => {
 
     // Cleanup on unmount
     return () => {
-      monadWebSocket.disconnect();
+      monadWebSocket?.disconnect();
     };
   }, []);
 
@@ -217,6 +222,7 @@ export const useRealTimeData = () => {
   }, []);
 
   const connect = useCallback(async () => {
+    if (!monadWebSocket) return;
     try {
       await monadWebSocket.connect();
     } catch (error) {
@@ -225,6 +231,7 @@ export const useRealTimeData = () => {
   }, []);
 
   const disconnect = useCallback(() => {
+    if (!monadWebSocket) return;
     monadWebSocket.disconnect();
   }, []);
 
@@ -243,6 +250,7 @@ export const useRealTimeData = () => {
     disconnect,
 
     // Utility
-    getConnectionStatus: monadWebSocket.getConnectionStatus.bind(monadWebSocket),
+    getConnectionStatus:
+      monadWebSocket?.getConnectionStatus.bind(monadWebSocket) || (() => 'disconnected'),
   };
 };

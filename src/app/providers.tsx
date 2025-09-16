@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { useState } from 'react';
+import { Toaster } from 'sonner';
 import '@rainbow-me/rainbowkit/styles.css';
 import { config } from '@/lib/wagmi';
 import { Navbar } from '@/components/layout';
@@ -31,6 +32,7 @@ export function Providers({ children }: ProvidersProps) {
         <RainbowKitProvider>
           <Navbar />
           {children}
+          <Toaster position="top-right" richColors />
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

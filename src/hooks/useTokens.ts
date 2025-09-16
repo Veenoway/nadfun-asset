@@ -12,6 +12,7 @@ import axios from 'axios';
 const useTokensByCreationTime = (
   page: number = 1,
   limit: number = 20,
+  initialData?: OrderTokenResponse,
 ): UseQueryResult<OrderTokenResponse> => {
   return useQuery({
     queryKey: ['tokens', 'creation_time', page, limit],
@@ -21,7 +22,10 @@ const useTokensByCreationTime = (
       });
       return response.data;
     },
+    initialData,
     staleTime: 5 * 60 * 1000,
+    refetchInterval: 30 * 1000, // Auto-refetch every 30 seconds
+    refetchIntervalInBackground: true,
     gcTime: 10 * 60 * 1000,
   });
 };

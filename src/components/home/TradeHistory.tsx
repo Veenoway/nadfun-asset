@@ -1,4 +1,5 @@
-import { SelectedToken } from '@/app/page';
+'use client';
+
 import { useTradeHistoryOne } from '@/hooks';
 import { formatMON, formatTokenBalance } from '@/lib/helpers';
 import { ExternalLink } from 'lucide-react';
@@ -14,6 +15,7 @@ import {
   TableRow,
   Button,
 } from '@/components/ui';
+import { SelectedToken } from './Home';
 
 interface TradeHistoryProps {
   selectedTokens: SelectedToken[];

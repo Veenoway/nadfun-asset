@@ -51,13 +51,18 @@ export class MonadWebSocket {
   private onErrorCallback?: (error: any) => void;
 
   constructor() {
-    this.setupEventHandlers();
+    // Only setup event handlers in the browser
+    if (typeof window !== 'undefined') {
+      this.setupEventHandlers();
+    }
   }
 
   private setupEventHandlers() {
     // Auto-reconnect on connection loss
-    window.addEventListener('online', () => this.connect());
-    window.addEventListener('focus', () => this.connect());
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', () => this.connect());
+      window.addEventListener('focus', () => this.connect());
+    }
   }
 
   public connect(): Promise<void> {
@@ -150,7 +155,7 @@ export class MonadWebSocket {
       params: params ? [method, params] : [method],
     };
 
-    console.log(`📡 Subscribing to ${method}:`, message);
+    //console.log(`📡 Subscribing to ${method}:`, message);
     this.ws.send(JSON.stringify(message));
   }
 
@@ -191,7 +196,7 @@ export class MonadWebSocket {
         size: result.size,
       };
 
-      console.log(`🆕 New block: #${parseInt(block.number, 16)} (${block.commitState})`);
+      //console.log(`🆕 New block: #${parseInt(block.number, 16)} (${block.commitState})`);
       this.onBlockCallback?.(block);
     } else if (result.transactionHash) {
       // This is a transaction log
@@ -207,7 +212,7 @@ export class MonadWebSocket {
         removed: result.removed,
       };
 
-      console.log(`💸 New transaction: ${log.transactionHash.slice(0, 10)}...`);
+      //console.log(`💸 New transaction: ${log.transactionHash.slice(0, 10)}...`);
       this.onLogCallback?.(log);
     }
   }
@@ -266,5 +271,5 @@ export class MonadWebSocket {
   }
 }
 
-// Singleton instance
-export const monadWebSocket = new MonadWebSocket();
+// Singleton instance - only create in browser environment
+export const monadWebSocket = typeof window !== 'undefined' ? new MonadWebSocket() : null;
