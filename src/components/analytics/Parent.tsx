@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, Users, Activity, Loader2, DollarSign, X } from 'lucide-react';
+import { DrawerClose } from '@/components/ui/drawer';
 
 import { useTokenHoldersStats } from '@/hooks/analytics/useTokenHolders';
 import { useWalletGrowth } from '@/hooks/analytics/useWalletGrowth';
@@ -322,9 +323,11 @@ const Parent = ({ tokenAddress }: ParentProps) => {
               {tokenMetadata?.token_metadata?.is_listing ? 'DEX Listed' : 'Bonding'}
             </div>
           </div>
-          <div className="bg-terciary p-1 rounded border border-borderColor flex items-center gap-1 cursor-pointer px-3">
-            <X size={16} className="text-white/50 hover:text-white" />
-          </div>
+          <DrawerClose asChild>
+            <button className="bg-terciary p-1 rounded border border-borderColor flex items-center gap-1 cursor-pointer px-3">
+              <X size={16} className="text-white/50 hover:text-white" />
+            </button>
+          </DrawerClose>
         </div>
       )}
 

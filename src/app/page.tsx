@@ -161,12 +161,12 @@ export default function HomePage() {
                                   onClick={() =>
                                     console.log(selectedToken.token.token_info.token_id)
                                   }
-                                  className="flex items-center gap-1 bg-secondary border border-borderColor"
+                                  className="flex items-center gap-1 bg-brandColor hover:bg-brandColor/80 text-white"
                                 >
                                   <span className="text-xs text-white">View analytics</span>
                                 </Button>
                               </DrawerTrigger>
-                              <DrawerContent className="border pointer-events-none outline-[0.5px] outline-brandColor/50">
+                              <DrawerContent className="border outline-[0.5px] outline-brandColor/50">
                                 <Parent tokenAddress={selectedToken.token.token_info.token_id!} />
                               </DrawerContent>
                             </Drawer>
