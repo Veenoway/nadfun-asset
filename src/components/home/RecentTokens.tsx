@@ -1,5 +1,12 @@
+'use client';
+
 import { useUserTokenBalances } from '@/hooks/useTokens';
-import { formatMarketCap, formatNickname, formatRelativeTime } from '@/lib/helpers';
+import {
+  formatMarketCap,
+  formatNickname,
+  formatRelativeTime,
+  formatTokenBalance,
+} from '@/lib/helpers';
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { OrderTokenResponse } from '@/lib/types';
@@ -114,33 +121,36 @@ const RecentTokens = ({ tokensByCreationTime, handleTokenSelect }: RecentTokensP
                   className="flex items-center rounded border border-borderColor bg-quaternary/20 cursor-pointer hover:border-white/15 hover:bg-quaternary transition-colors"
                   onClick={() => handleTokenSelect(token, 'my-tokens')}
                 >
-                  {token.token_info.image_uri && (
-                    <div className="w-auto h-full ml-2">
-                      <img
-                        src={token.token_info.image_uri}
-                        alt={token.token_info.name}
-                        width={80}
-                        height={80}
-                        className="min-w-[70px] h-[70px] object-cover rounded-full aspect-square w-fit border border-borderColor"
-                      />
-                    </div>
-                  )}
-                  <div className="w-full p-0.5">
-                    <div className="flex justify-between items-center text-xs w-full pr-2">
-                      <p>Balance: {token.balance}</p>
-                      <p>Wallet Token</p>
-                    </div>
-                    <div className="text-sm flex items-center gap-4">
-                      <p>{token.token_info.name}</p>
-                      <p>{token.token_info.symbol}</p>
-                    </div>
-                    {token.token_info.market_cap ? (
-                      <p className="text-xs">
-                        Mkt. Cap: {formatMarketCap(token.token_info.market_cap)} MON
-                      </p>
-                    ) : (
-                      <p className="text-xs text-gray-400">Market cap unavailable</p>
+                  <div className="p-3 w-full flex items-center gap-2">
+                    {token.token_info.image_uri && (
+                      <div className="w-auto h-full">
+                        <img
+                          src={token.token_info.image_uri}
+                          alt={token.token_info.name}
+                          width={80}
+                          height={80}
+                          className="min-w-[70px] h-[70px] object-cover rounded-full aspect-square w-fit border border-borderColor"
+                        />
+                      </div>
                     )}
+                    <div className="w-full">
+                      <div className="mb-2">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-sm font-medium text-white truncate">
+                            {token.token_info.name}
+                          </h3>
+                          <span className="text-xs text-white/70 -mb-0.5 uppercase">
+                            {token.token_info.symbol}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between pt-2 border-t border-borderColor">
+                        <span className="text-xs text-white/60">Balance</span>
+                        <span className="text-xs font-semibold text-white">
+                          {formatTokenBalance(token.balance, true)} {token.token_info.symbol}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))

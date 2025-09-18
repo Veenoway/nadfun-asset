@@ -1,3 +1,5 @@
+'use client';
+
 import { useNadFunTrading } from '@/hooks/useNadFunTrading';
 import { useUserTokenBalances } from '@/hooks/useTokens';
 import { cn } from '@/lib/utils';
@@ -6,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { formatEther } from 'viem';
 import { useAccount, useBalance } from 'wagmi';
 import { KingOfTheHill } from '@/lib/types';
+import { Input } from '../ui';
 
 interface BuySellProps {
   selectedToken: KingOfTheHill;
@@ -175,28 +178,41 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
                 <span className="text-sm text-white/60 font-light">Balance</span>
                 <span className="text-sm text-white">{formatNumber(availableBalance)} MON</span>
               </div>
-              <div className="border border-borderColor rounded px-3 py-2 bg-quaternary/70">
-                <div className="flex items-center justify-between">
-                  <input
-                    type="text"
-                    value={fromAmount}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                        setFromAmount(value);
-                      }
-                    }}
-                    className="text-base font-mono text-white bg-transparent outline-none flex-1"
-                    placeholder="0.0"
-                  />
-                </div>
-              </div>
+              <Input
+                type="text"
+                value={fromAmount}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                    setFromAmount(value);
+                  }
+                }}
+                className="text-base font-mono text-white bg-transparent outline-none flex-1 border border-borderColor focus-visible:ring-borderColor h-12"
+                placeholder="0.0"
+              />
+
               {fromAmount && Number(fromAmount) > availableBalance && (
                 <div className="text-xs text-red-500">Amount exceeds available balance</div>
               )}
               {fromAmount && Number(fromAmount) <= 0 && (
                 <div className="text-xs text-red-500">Please enter a valid amount</div>
               )}
+
+              {/* <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-white lowercase">MON to receive</span>
+                </div>
+                <div className="border border-borderColor rounded p-4 bg-quaternary/70">
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-mono text-white">
+                      {Number(amountOut).toFixed(4)}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-white">MON</span>
+                    </div>
+                  </div>
+                </div>
+              </div> */}
             </div>
           ) : (
             <div className="space-y-3">
@@ -205,7 +221,7 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
                   {selectedToken?.token_info.symbol?.toLowerCase()} to sell
                 </span>
                 <span className="text-xs">
-                  Available: {formatTokenBalance(userTokenBalance)}{' '}
+                  Available: {formatTokenBalance(userTokenBalance, true)}{' '}
                   {selectedToken?.token_info.symbol}
                 </span>
               </div>
@@ -215,29 +231,25 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
                   <button
                     key={percentage}
                     onClick={() => handlePercentageSelect(percentage)}
-                    className="flex-1 px-3 py-2 text-xs font-medium bg-secondary hover:bg-secondary/80 text-white/80 hover:text-white rounded-md transition-colors"
+                    className="flex-1 px-3 py-2 text-xs font-medium border border-borderColor bg-secondary hover:bg-secondary/80 text-white/80 hover:text-white rounded-md transition-colors cursor-pointer"
                   >
                     {percentage}%
                   </button>
                 ))}
               </div>
 
-              <div className="border border-borderColor rounded p-4 bg-secondary">
-                <div className="flex items-center justify-between">
-                  <input
-                    type="text"
-                    value={tokenAmount}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                        setTokenAmount(value);
-                      }
-                    }}
-                    className="text-lg font-mono text-white bg-transparent outline-none flex-1"
-                    placeholder="0.0"
-                  />
-                </div>
-              </div>
+              <Input
+                type="text"
+                value={tokenAmount}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                    setTokenAmount(value);
+                  }
+                }}
+                className="text-base font-mono text-white bg-transparent outline-none flex-1 border border-borderColor focus-visible:ring-borderColor h-12"
+                placeholder="0.0"
+              />
               {tokenAmount && Number(tokenAmount) > Number(userTokenBalance) && (
                 <div className="text-xs text-red-500">Amount exceeds available balance</div>
               )}
@@ -248,11 +260,11 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
           )}
 
           {mode === 'sell' && amountOut && (
-            <div className="space-y-3">
+            <div className="space-y-2 mt-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-white lowercase">MON to receive</span>
+                <span className="text-sm font-medium text-white">MON to receive</span>
               </div>
-              <div className="border border-borderColor rounded p-4 bg-secondary">
+              <div className="border border-borderColor rounded py-2 px-4 bg-quaternary/70">
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-mono text-white">
                     {Number(amountOut).toFixed(4)}
@@ -271,7 +283,7 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
         <button
           onClick={handleSwap}
           disabled={isTradingLoading || isListed || isLocked}
-          className="w-full bg-brandColor hover:bg-brandColor/80 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 text-sm font-medium rounded transition-colors"
+          className="w-full bg-brandColor cursor-pointer hover:bg-brandColor/80 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 text-sm font-medium rounded transition-colors"
         >
           {isTradingLoading ? 'PROCESSING...' : mode === 'buy' ? 'BUY TOKENS' : 'SELL TOKENS'}
         </button>
