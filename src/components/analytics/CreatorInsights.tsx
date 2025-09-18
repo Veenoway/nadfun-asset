@@ -10,6 +10,8 @@ import {
   Package,
   Target,
   BarChart3,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { useTokenAndCreatorTokens } from '@/hooks/analytics/useTokenAndCreatorTokens';
 import { useTokenMetadata } from '@/hooks/analytics/useTokenMetadata';
@@ -19,6 +21,7 @@ import {
   formatMarketCap,
 } from '@/hooks/analytics/useMultipleMarketData';
 import { Loader2 } from 'lucide-react';
+import { useClipboard } from '@/hooks/useClipboard';
 
 interface CreatorInsightsProps {
   tokenAddress?: string;
@@ -125,6 +128,7 @@ const TokenAvatar = ({
 const CreatorInsights = ({ tokenAddress = '' }: CreatorInsightsProps) => {
   const { data: tokenAndCreatorData, isLoading, error } = useTokenAndCreatorTokens(tokenAddress);
   const [showAllTokens, setShowAllTokens] = useState(false);
+  const { copyToClipboard, copied } = useClipboard();
 
   // Get all token IDs for market data fetching
   const allTokenIds = tokenAndCreatorData?.data?.creatorTokens?.map((token) => token.id) || [];
@@ -177,9 +181,34 @@ const CreatorInsights = ({ tokenAddress = '' }: CreatorInsightsProps) => {
           <h3 className="text-lg font-semibold text-white">Creator Insights</h3>
           <p className="text-purple-300 text-sm">Creator Created Tokens analysis</p>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <User className="w-4 h-4 text-purple-400" />
-          <span className="text-xs text-purple-300 font-mono">{formatAddress(creatorAddress)}</span>
+          <a
+            href={`https://testnet.nad.fun/v3/profile/${creatorAddress}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-purple-300 font-mono hover:text-purple-200 underline underline-offset-2"
+            title={creatorAddress}
+          >
+            {formatAddress(creatorAddress)}
+          </a>
+          <button
+            onClick={() => copyToClipboard(creatorAddress)}
+            className={`p-1 rounded border transition-colors ${
+              copied
+                ? 'bg-emerald-600/20 border-emerald-500/30 hover:bg-emerald-600/30'
+                : 'bg-purple-600/20 border-purple-500/30 hover:bg-purple-600/30'
+            }`}
+            aria-label="Copy creator address"
+            title={copied ? 'Copied!' : 'Copy address'}
+          >
+            {copied ? (
+              <Check className="w-3.5 h-3.5 text-emerald-300" />
+            ) : (
+              <Copy className="w-3.5 h-3.5 text-purple-300" />
+            )}
+          </button>
+          {copied && <span className="text-[10px] text-emerald-400">Copied</span>}
         </div>
       </div>
 
