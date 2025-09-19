@@ -7613,7 +7613,7 @@ __metadata:
     lint-staged: "npm:^16.1.6"
     lucide-react: "npm:^0.542.0"
     next: "npm:15.5.2"
-    next-themes: "npm:^0.4.6"
+    next-themes: "npm:0.4.6"
     prettier: "npm:^3.6.2"
     react: "npm:19.1.0"
     react-dom: "npm:19.1.0"
@@ -7670,7 +7670,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"next-themes@npm:^0.4.6":
+"next-themes@npm:0.4.6":
   version: 0.4.6
   resolution: "next-themes@npm:0.4.6"
   peerDependencies:
