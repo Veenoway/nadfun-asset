@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 export interface SelectedToken {
   token: KingOfTheHill;
   tabId: string;
-  source: 'recent' | 'my-tokens';
+  source: 'recent' | 'my-tokens' | 'search';
 }
 
 interface HomeProps {
@@ -41,7 +41,7 @@ const Home = ({ initialTokensData }: HomeProps) => {
   }, [tokensByCreationTime, selectedTokens.length]); // Add selectedTokens.length to dependencies
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleTokenSelect = (token: any, source: 'recent' | 'my-tokens') => {
+  const handleTokenSelect = (token: any, source: 'recent' | 'my-tokens' | 'search') => {
     const isAlreadySelected = selectedTokens.some(
       (st) => st.token.token_info.token_id === token.token_info.token_id,
     );
