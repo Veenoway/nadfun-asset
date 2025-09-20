@@ -3,19 +3,18 @@
 import { useTokensByCreationTime } from '@/hooks/useTokens';
 import { formatNickname } from '@/lib/helpers';
 import { useEffect, useState } from 'react';
-import { BuySell, RecentTokens, TradeHistory } from '@/components/home';
+import { BuySell, RecentTokens, TokenChart, TradeHistory } from '@/components/home';
 import { Copy } from 'lucide-react';
 import { KingOfTheHill, OrderTokenResponse } from '@/lib/types';
-import { Button } from '@/components/ui';
 import { Parent } from '@/components/analytics/Parent';
-import { Drawer, DrawerTrigger, DrawerContent } from '@/components/ui/drawer';
+import { Drawer, DrawerTrigger, DrawerContent, Button } from '@/components/ui';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { toast } from 'sonner';
 
 export interface SelectedToken {
   token: KingOfTheHill;
   tabId: string;
-  source: 'recent' | 'my-tokens';
+  source: 'recent' | 'my-tokens' | 'search';
 }
 
 interface HomeProps {
@@ -28,7 +27,7 @@ const Home = ({ initialTokensData }: HomeProps) => {
   const [activeTab, setActiveTab] = useState<string>('');
 
   useEffect(() => {
-    // Only set the default token if no tokens are selected yet
+    //set the default token if no tokens are selected yet
     if (tokensByCreationTime?.king_of_the_hill && selectedTokens.length === 0) {
       setSelectedTokens([
         {
@@ -38,10 +37,10 @@ const Home = ({ initialTokensData }: HomeProps) => {
         },
       ]);
     }
-  }, [tokensByCreationTime, selectedTokens.length]); // Add selectedTokens.length to dependencies
+  }, [tokensByCreationTime, selectedTokens.length]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleTokenSelect = (token: any, source: 'recent' | 'my-tokens') => {
+  const handleTokenSelect = (token: any, source: 'recent' | 'my-tokens' | 'search') => {
     const isAlreadySelected = selectedTokens.some(
       (st) => st.token.token_info.token_id === token.token_info.token_id,
     );
@@ -149,7 +148,16 @@ const Home = ({ initialTokensData }: HomeProps) => {
                               ({selectedToken.token.token_info.token_id?.slice(0, 4)}..
                               {selectedToken.token.token_info.token_id?.slice(-4)})
                             </p>
-                            <Copy size={12} className="cursor-pointer text-gray-500" />
+                            <Copy
+                              onClick={() => {
+                                navigator.clipboard.writeText(
+                                  selectedToken.token.token_info.token_id || '',
+                                );
+                                toast.success('Copied!');
+                              }}
+                              size={12}
+                              className="cursor-pointer text-gray-500"
+                            />
                           </div>
                           <div className="flex items-center gap-4">
                             <p className="text-xs text-gray-500">
@@ -178,10 +186,12 @@ const Home = ({ initialTokensData }: HomeProps) => {
                           </div>
                         </div>
                         <div className="mx-4 border border-borderColor rounded ">
-                          <div className="h-[450px] bg-secondary rounded flex items-center justify-center">
+                          {/* <div className="h-[450px] bg-secondary rounded flex items-center justify-center">
                             CHART
-                          </div>
-                          {/* <TokenChart tokenAddress={selectedToken.token.token_info.token_id} /> */}
+                          </div> */}
+                          <TokenChart
+                            tokenAddress={selectedToken.token.token_info.token_id || ''}
+                          />
                         </div>
                         <div className="px-4 rounded-lg">
                           <TradeHistory selectedTokens={selectedTokens} activeTab={activeTab} />
@@ -189,7 +199,6 @@ const Home = ({ initialTokensData }: HomeProps) => {
                       </div>
                     </div>
 
-                    {/* Buy/Sell Actions */}
                     <div className="min-w-[400px] h-fit space-y-3">
                       <div className="bg-secondary border border-borderColor rounded pb-4">
                         <BuySell

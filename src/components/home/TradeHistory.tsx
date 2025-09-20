@@ -40,7 +40,7 @@ const TradeHistory = ({ selectedTokens, activeTab }: TradeHistoryProps) => {
   const trades = useMemo(() => data?.items, [data]);
 
   return (
-    <div className="mt-3">
+    <div className="mt-3 mb-8">
       <div className="col-span-12 lg:col-span-8 row-span-3 rounded-lg h-full">
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-center gap-2">

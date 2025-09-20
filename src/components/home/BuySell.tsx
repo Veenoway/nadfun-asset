@@ -2,6 +2,7 @@
 
 import { useNadFunTrading } from '@/hooks/useNadFunTrading';
 import { useUserTokenBalances } from '@/hooks/useTokens';
+import { useTokenRefetch } from '@/hooks/useTokenRefetch';
 import { cn } from '@/lib/utils';
 import { formatNumber, formatTokenBalance } from '@/lib/helpers';
 import { useEffect, useState } from 'react';
@@ -9,6 +10,7 @@ import { formatEther } from 'viem';
 import { useAccount, useBalance } from 'wagmi';
 import { KingOfTheHill } from '@/lib/types';
 import { Input } from '../ui';
+import { toast } from 'sonner';
 
 interface BuySellProps {
   selectedToken: KingOfTheHill;
@@ -18,13 +20,13 @@ interface BuySellProps {
 const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
   const { address } = useAccount();
   const { data: balance } = useBalance({ address });
+  const { refetchAllTokenData } = useTokenRefetch();
 
   const [mode, setMode] = useState<'buy' | 'sell'>('buy');
   const [fromAmount, setFromAmount] = useState('');
   const [tokenAmount, setTokenAmount] = useState('');
   const [userTokenBalance, setUserTokenBalance] = useState('0.000000');
 
-  // Check if user owns this token
   const userOwnsToken = userTokenBalance !== '0.000000' && Number(userTokenBalance) > 0;
 
   const tradingAmount = mode === 'buy' ? fromAmount : tokenAmount;
@@ -59,25 +61,24 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
     }
   }, [isFromMyTokens, userOwnsToken]);
 
-  // Calculate available balance
   const availableBalance = balance ? Number(formatEther(balance.value)) : 0;
 
   const handlePercentageSelect = (percentage: number) => {
-    // Convert wei to ether first, then calculate percentage
     const balanceInEther = formatEther(BigInt(userTokenBalance));
     const amount = (Number(balanceInEther) * percentage) / 100;
     setTokenAmount(amount.toFixed(6));
   };
 
-  // Handle successful trade
   useEffect(() => {
     if (isTradeSuccess) {
-      alert('Token traded successfully!');
+      toast.success('Token traded successfully!');
 
       setFromAmount('');
       setTokenAmount('');
+
+      refetchAllTokenData(address);
     }
-  }, [isTradeSuccess]);
+  }, [isTradeSuccess, refetchAllTokenData, address]);
 
   const handleSwap = async () => {
     if (!selectedToken?.token_info.token_id) {
@@ -94,6 +95,7 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
     if (mode === 'buy') {
       if (!fromAmount || Number(fromAmount) <= 0) {
         console.error('Invalid amount');
+        toast.error('Invalid amount');
         return;
       }
 
