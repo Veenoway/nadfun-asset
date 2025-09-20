@@ -27,7 +27,7 @@ const Home = ({ initialTokensData }: HomeProps) => {
   const [activeTab, setActiveTab] = useState<string>('');
 
   useEffect(() => {
-    // Only set the default token if no tokens are selected yet
+    //set the default token if no tokens are selected yet
     if (tokensByCreationTime?.king_of_the_hill && selectedTokens.length === 0) {
       setSelectedTokens([
         {
@@ -37,7 +37,7 @@ const Home = ({ initialTokensData }: HomeProps) => {
         },
       ]);
     }
-  }, [tokensByCreationTime, selectedTokens.length]); // Add selectedTokens.length to dependencies
+  }, [tokensByCreationTime, selectedTokens.length]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleTokenSelect = (token: any, source: 'recent' | 'my-tokens' | 'search') => {
@@ -148,7 +148,16 @@ const Home = ({ initialTokensData }: HomeProps) => {
                               ({selectedToken.token.token_info.token_id?.slice(0, 4)}..
                               {selectedToken.token.token_info.token_id?.slice(-4)})
                             </p>
-                            <Copy size={12} className="cursor-pointer text-gray-500" />
+                            <Copy
+                              onClick={() => {
+                                navigator.clipboard.writeText(
+                                  selectedToken.token.token_info.token_id || '',
+                                );
+                                toast.success('Copied!');
+                              }}
+                              size={12}
+                              className="cursor-pointer text-gray-500"
+                            />
                           </div>
                           <div className="flex items-center gap-4">
                             <p className="text-xs text-gray-500">
@@ -190,7 +199,6 @@ const Home = ({ initialTokensData }: HomeProps) => {
                       </div>
                     </div>
 
-                    {/* Buy/Sell Actions */}
                     <div className="min-w-[400px] h-fit space-y-3">
                       <div className="bg-secondary border border-borderColor rounded pb-4">
                         <BuySell

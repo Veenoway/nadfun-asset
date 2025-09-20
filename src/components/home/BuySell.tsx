@@ -2,6 +2,7 @@
 
 import { useNadFunTrading } from '@/hooks/useNadFunTrading';
 import { useUserTokenBalances } from '@/hooks/useTokens';
+import { useTokenRefetch } from '@/hooks/useTokenRefetch';
 import { cn } from '@/lib/utils';
 import { formatNumber, formatTokenBalance } from '@/lib/helpers';
 import { useEffect, useState } from 'react';
@@ -9,6 +10,7 @@ import { formatEther } from 'viem';
 import { useAccount, useBalance } from 'wagmi';
 import { KingOfTheHill } from '@/lib/types';
 import { Input } from '../ui';
+import { toast } from 'sonner';
 
 interface BuySellProps {
   selectedToken: KingOfTheHill;
@@ -18,6 +20,7 @@ interface BuySellProps {
 const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
   const { address } = useAccount();
   const { data: balance } = useBalance({ address });
+  const { refetchAllTokenData } = useTokenRefetch();
 
   const [mode, setMode] = useState<'buy' | 'sell'>('buy');
   const [fromAmount, setFromAmount] = useState('');
@@ -68,12 +71,14 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
 
   useEffect(() => {
     if (isTradeSuccess) {
-      alert('Token traded successfully!');
+      toast.success('Token traded successfully!');
 
       setFromAmount('');
       setTokenAmount('');
+
+      refetchAllTokenData(address);
     }
-  }, [isTradeSuccess]);
+  }, [isTradeSuccess, refetchAllTokenData, address]);
 
   const handleSwap = async () => {
     if (!selectedToken?.token_info.token_id) {
@@ -90,6 +95,7 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
     if (mode === 'buy') {
       if (!fromAmount || Number(fromAmount) <= 0) {
         console.error('Invalid amount');
+        toast.error('Invalid amount');
         return;
       }
 
