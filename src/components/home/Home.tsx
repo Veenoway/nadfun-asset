@@ -3,12 +3,11 @@
 import { useTokensByCreationTime } from '@/hooks/useTokens';
 import { formatNickname } from '@/lib/helpers';
 import { useEffect, useState } from 'react';
-import { BuySell, RecentTokens, TradeHistory } from '@/components/home';
+import { BuySell, RecentTokens, TokenChart, TradeHistory } from '@/components/home';
 import { Copy } from 'lucide-react';
 import { KingOfTheHill, OrderTokenResponse } from '@/lib/types';
-import { Button } from '@/components/ui';
 import { Parent } from '@/components/analytics/Parent';
-import { Drawer, DrawerTrigger, DrawerContent } from '@/components/ui/drawer';
+import { Drawer, DrawerTrigger, DrawerContent, Button } from '@/components/ui';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { toast } from 'sonner';
 
@@ -178,10 +177,12 @@ const Home = ({ initialTokensData }: HomeProps) => {
                           </div>
                         </div>
                         <div className="mx-4 border border-borderColor rounded ">
-                          <div className="h-[450px] bg-secondary rounded flex items-center justify-center">
+                          {/* <div className="h-[450px] bg-secondary rounded flex items-center justify-center">
                             CHART
-                          </div>
-                          {/* <TokenChart tokenAddress={selectedToken.token.token_info.token_id} /> */}
+                          </div> */}
+                          <TokenChart
+                            tokenAddress={selectedToken.token.token_info.token_id || ''}
+                          />
                         </div>
                         <div className="px-4 rounded-lg">
                           <TradeHistory selectedTokens={selectedTokens} activeTab={activeTab} />

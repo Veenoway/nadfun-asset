@@ -5,3 +5,4 @@ export * from './input';
 export * from './progress';
 export * from './toast';
 export * from './sonner';
+export * from './drawer';

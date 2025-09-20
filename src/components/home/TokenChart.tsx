@@ -69,7 +69,7 @@ export function TokenChart({ tokenAddress }: TokenChartProps) {
   }, [chartData]);
 
   return (
-    <div className="w-full backdrop-blur-sm bg-black/20 border-[0.1px] border-borderLight/10 p-1 shadow-lg shadow-borderLighter/60">
+    <div className="w-full backdrop-blur-sm bg-black/20 border-[0.1px] border-borderColor p-0.5 shadow-sm">
       <div ref={chartContainerRef} className="h-90" />
     </div>
   );
