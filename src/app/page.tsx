@@ -1,7 +1,7 @@
-import { Home } from '@/components/home';
-import { fetchTokensByCreationTime } from '@/lib/server-data';
+'use client';
 
-export default async function HomePage() {
-  const initialTokensData = await fetchTokensByCreationTime(1, 20);
-  return <Home initialTokensData={initialTokensData} />;
+import { Home } from '@/components/home';
+
+export default function HomePage() {
+  return <Home />;
 }

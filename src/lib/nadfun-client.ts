@@ -48,7 +48,6 @@ class NadfunClient {
 
     try {
       this.initialized = true;
-      console.log('NadfunClient initialized successfully');
     } catch (error) {
       console.error('Failed to initialize NadfunClient:', error);
       throw error;
@@ -57,8 +56,6 @@ class NadfunClient {
 
   private async callDirectAPI(endpoint: string, tokenAddress: string): Promise<any> {
     try {
-      console.log(`Calling direct API: ${endpoint} for token: ${tokenAddress}`);
-
       // Use the direct API endpoint
       const response = await fetch(`http://localhost:8002${endpoint}`, {
         method: 'GET',
@@ -67,16 +64,12 @@ class NadfunClient {
         },
       });
 
-      console.log(`API response status: ${response.status}`);
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`API error response: ${errorText}`);
         throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
       const result = await response.json();
-      console.log(`API result for ${endpoint}:`, result);
       return result;
     } catch (error) {
       console.error(`Error calling direct API for ${endpoint}:`, error);
@@ -88,9 +81,7 @@ class NadfunClient {
     await this.initialize();
 
     try {
-      console.log('Getting real curve summary for token:', tokenAddress);
       const result = await this.callDirectAPI(`/summary-only/${tokenAddress}`, tokenAddress);
-      console.log('Real curve summary:', result);
 
       // Transform the API response to match our interface
       return {
@@ -118,12 +109,10 @@ class NadfunClient {
     await this.initialize();
 
     try {
-      console.log('Getting real DEX swaps for token:', tokenAddress);
       const result = await this.callDirectAPI(
         `/comprehensive-trades/${tokenAddress}?include_trades=true`,
         tokenAddress,
       );
-      console.log('Real DEX swaps found:', result.trades?.length || 0);
 
       // Transform the API response to match our interface
       return (result.trades || []).map((trade: any) => ({
@@ -149,12 +138,10 @@ class NadfunClient {
     await this.initialize();
 
     try {
-      console.log('Getting real curve events for token:', tokenAddress);
       const result = await this.callDirectAPI(
         `/comprehensive-trades/${tokenAddress}?include_trades=true`,
         tokenAddress,
       );
-      console.log('Real curve events found:', result.trades?.length || 0);
 
       // Transform the API response to match our interface
       return (result.trades || []).map((trade: any) => ({
@@ -176,9 +163,7 @@ class NadfunClient {
     await this.initialize();
 
     try {
-      console.log('Starting DEX stream for token:', tokenAddress);
       const result = await this.callDirectAPI('/dex-stream', tokenAddress);
-      console.log('DEX stream started:', result);
       return result;
     } catch (error) {
       console.error('Error starting DEX stream:', error);
@@ -201,7 +186,6 @@ class NadfunClient {
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
-        console.log('WebSocket connected for live DEX stream');
         // Subscribe to the token
         const subscribeMessage = {
           jsonrpc: '2.0',
@@ -270,7 +254,6 @@ class NadfunClient {
     if (ws) {
       ws.close();
       this.streams.delete(tokenAddress);
-      console.log('Disconnected from live stream for token:', tokenAddress);
     }
   }
 
@@ -278,7 +261,6 @@ class NadfunClient {
   disconnectAllStreams(): void {
     this.streams.forEach((ws, tokenAddress) => {
       ws.close();
-      console.log('Disconnected from live stream for token:', tokenAddress);
     });
     this.streams.clear();
   }

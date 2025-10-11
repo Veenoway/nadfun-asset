@@ -60,64 +60,136 @@ const RecentTokens = ({ tokensByCreationTime, handleTokenSelect }: RecentTokensP
           }`}
           onClick={() => setActiveTab('search')}
         >
-          Search
+          Search Tokens
         </button>
       </div>
 
-      <div className="max-h-[68vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300 min-w-[300px]">
+      <div className="2xl:max-h-[calc(100vh-200px)] h-[100vh] overflow-y-auto min-w-[300px] no-scrollbar">
         {activeTab === 'recent' && (
           <div className="space-y-2">
-            {tokensByCreationTime?.order_token.map((token) => (
+            {/* King of the Hill Token */}
+            {tokensByCreationTime?.king_of_the_hill && (
               <div
-                key={token.token_info.token_id}
-                className="flex items-center rounded border border-borderColor bg-quaternary/20 cursor-pointer hover:border-white/15 hover:bg-quaternary transition-colors"
-                onClick={() => handleTokenSelect(token, 'recent')}
+                key={tokensByCreationTime.king_of_the_hill.token_info.token_id}
+                className="flex items-center rounded border border-brandColor bg-brandColor/10 cursor-pointer hover:border-brandColor/80 hover:bg-brandColor/20 transition-colors"
+                onClick={() => handleTokenSelect(tokensByCreationTime.king_of_the_hill, 'recent')}
               >
                 <div className="w-full flex items-center">
-                  {token.token_info.image_uri && (
+                  {tokensByCreationTime.king_of_the_hill.token_info.image_uri && (
                     <div className="w-auto h-full ml-2">
                       <img
-                        src={token.token_info.image_uri}
-                        alt={token.token_info.name}
+                        src={tokensByCreationTime.king_of_the_hill.token_info.image_uri}
+                        alt={tokensByCreationTime.king_of_the_hill.token_info.name}
                         width={80}
                         height={80}
-                        className="min-w-[70px] h-[70px] object-cover rounded-full aspect-square w-fit border border-borderColor"
+                        className="min-w-[70px] h-[70px] object-cover rounded-full aspect-square w-fit border border-brandColor"
                       />
                     </div>
                   )}
                   <div className="p-3 w-full">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-[10px] text-white bg-quaternary px-1 rounded">
-                        {formatRelativeTime(Number(token.token_info.created_at))}
-                      </span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[10px] text-brandColor bg-brandColor/20 px-1 rounded font-semibold">
+                          👑 KING OF THE HILL
+                        </span>
+                        <span className="text-[10px] text-white bg-quaternary px-1 rounded">
+                          {formatRelativeTime(
+                            Number(tokensByCreationTime.king_of_the_hill.token_info.created_at),
+                          )}
+                        </span>
+                      </div>
                       <span className="text-[10px] text-brandColor font-normal">
-                        by {formatNickname(token.account_info.nickname || '')}
+                        by{' '}
+                        {formatNickname(
+                          tokensByCreationTime.king_of_the_hill.account_info.nickname || '',
+                        )}
                       </span>
                     </div>
 
                     <div className="mb-2">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="text-sm font-medium text-white truncate">
-                          {token.token_info.name}
+                          {tokensByCreationTime.king_of_the_hill.token_info.name}
                         </h3>
                         <span className="text-xs text-white/70 -mb-0.5 uppercase">
-                          {token.token_info.symbol}
+                          {tokensByCreationTime.king_of_the_hill.token_info.symbol}
                         </span>
                       </div>
                     </div>
 
-                    {token.token_info.market_cap && (
-                      <div className="flex items-center justify-between pt-2 border-t border-borderColor">
+                    {tokensByCreationTime.king_of_the_hill.token_info.market_cap && (
+                      <div className="flex items-center justify-between pt-2 border-t border-brandColor/30">
                         <span className="text-xs text-white/60">Market Cap</span>
                         <span className="text-xs font-semibold text-white">
-                          {formatMarketCap(token.token_info.market_cap)} MON
+                          {formatMarketCap(
+                            tokensByCreationTime.king_of_the_hill.token_info.market_cap,
+                          )}{' '}
+                          MON
                         </span>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
-            ))}
+            )}
+
+            {tokensByCreationTime?.order_token
+              .filter(
+                (token) =>
+                  token.token_info.token_id !==
+                  tokensByCreationTime?.king_of_the_hill?.token_info.token_id,
+              )
+              .map((token) => (
+                <div
+                  key={token.token_info.token_id}
+                  className="flex items-center rounded border border-borderColor bg-quaternary/20 cursor-pointer hover:border-white/15 hover:bg-quaternary transition-colors"
+                  onClick={() => handleTokenSelect(token, 'recent')}
+                >
+                  <div className="w-full flex items-center">
+                    {token.token_info.image_uri && (
+                      <div className="w-auto h-full ml-2">
+                        <img
+                          src={token.token_info.image_uri}
+                          alt={token.token_info.name}
+                          width={80}
+                          height={80}
+                          className="min-w-[70px] h-[70px] object-cover rounded-full aspect-square w-fit border border-borderColor"
+                        />
+                      </div>
+                    )}
+                    <div className="p-3 w-full">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-[10px] text-white bg-quaternary px-1 rounded">
+                          {formatRelativeTime(Number(token.token_info.created_at))}
+                        </span>
+                        <span className="text-[10px] text-brandColor font-normal">
+                          by {formatNickname(token.account_info.nickname || '')}
+                        </span>
+                      </div>
+
+                      <div className="mb-2">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-sm font-medium text-white truncate">
+                            {token.token_info.name}
+                          </h3>
+                          <span className="text-xs text-white/70 -mb-0.5 uppercase">
+                            {token.token_info.symbol}
+                          </span>
+                        </div>
+                      </div>
+
+                      {token.token_info.market_cap && (
+                        <div className="flex items-center justify-between pt-2 border-t border-borderColor">
+                          <span className="text-xs text-white/60">Market Cap</span>
+                          <span className="text-xs font-semibold text-white">
+                            {formatMarketCap(token.token_info.market_cap)} MON
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
           </div>
         )}
 

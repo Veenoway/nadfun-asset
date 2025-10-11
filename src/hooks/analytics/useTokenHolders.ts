@@ -61,19 +61,17 @@ export const useTokenHoldersStats = (tokenId: string = '', timeframe: string = '
     queryKey: ['allTokenHolders', tokenId],
     queryFn: () => fetchAllTokenHolders(tokenId),
     enabled: isValidAddress(tokenId),
-    staleTime: 10000, // 10 seconds - data is fresh for only 10 seconds
-    refetchInterval: 15000, // Refetch every 15 seconds for real-time updates
+    staleTime: 10000,
+    refetchInterval: 15000,
     retry: (failureCount, error) => {
-      // Don't retry on network errors, but retry on other errors
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        console.log('Network error detected, not retrying');
         return false;
       }
       return failureCount < 2;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
-    refetchOnWindowFocus: true, // Refetch when user focuses the window
-    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 
   // Get real wallet holding analytics
@@ -92,8 +90,6 @@ export const useTokenHoldersStats = (tokenId: string = '', timeframe: string = '
 
   if (holdersData) {
     stats.totalHolders = calculateTotalHolders(holdersData);
-    console.log('Debug - holdersData length:', holdersData.length);
-    console.log('Debug - calculated totalHolders:', stats.totalHolders);
   }
 
   // Use real analytics data for new holders

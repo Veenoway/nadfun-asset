@@ -14,7 +14,6 @@ export function TokenChart({ tokenAddress }: TokenChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log('chartData', chartData);
     if (!chartContainerRef.current || !chartData) return;
 
     const chart = createChart(chartContainerRef.current, {
