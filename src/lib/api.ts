@@ -41,19 +41,12 @@ export const testTokenHoldersAPI = async (
   tokenId: string = '0x85d15ae02ACe2B4B5a38c835688a63F0988e2187',
 ): Promise<void> => {
   try {
-    console.log('Testing Token Holders API with token:', tokenId);
     const result = await fetchTokenHoldersGraphQL(tokenId);
-    console.log('API Test Result:', {
-      totalHolders: result.data.TokenHolding.length,
-      firstFewHolders: result.data.TokenHolding.slice(0, 3),
-      sampleBalance: result.data.TokenHolding[0]?.currentBalance,
-    });
   } catch (error) {
     console.error('Token Holders API test failed:', error);
   }
 };
 
-// Legacy API interfaces (for backward compatibility)
 export interface TokenHolder {
   TokenHolderAddress: string;
   TokenId: string | null;
@@ -98,7 +91,6 @@ export const fetchTokenHoldersGraphQLWithPagination = async (
 ): Promise<GraphQLTokenHoldersResponse> => {
   // Use mock data in development mode or when forced
   if (USE_MOCK_DATA || FORCE_MOCK_DATA) {
-    console.log('Using mock data for development or forced mode');
     return {
       data: {
         TokenHolding: getMockGraphQLTokenHolders(),
@@ -118,9 +110,6 @@ export const fetchTokenHoldersGraphQLWithPagination = async (
         } 
       }`,
     };
-
-    console.log('Fetching from GraphQL API:', GRAPHQL_API_URL);
-    console.log('Query:', JSON.stringify(query, null, 2));
 
     // Add timeout and better error handling
     const controller = new AbortController();
@@ -142,9 +131,6 @@ export const fetchTokenHoldersGraphQLWithPagination = async (
 
     clearTimeout(timeoutId);
 
-    console.log('Response status:', response.status);
-    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Error response body:', errorText);
@@ -152,7 +138,6 @@ export const fetchTokenHoldersGraphQLWithPagination = async (
     }
 
     const data = await response.json();
-    console.log('GraphQL API Response:', data);
 
     if (data.errors) {
       console.error('GraphQL errors:', data.errors);
@@ -187,15 +172,11 @@ export const fetchTokenHoldersGraphQL = async (
 export const convertGraphQLToLegacy = (
   graphqlResponse: GraphQLTokenHoldersResponse,
 ): TokenHoldersResponse => {
-  console.log('Debug - GraphQL response data length:', graphqlResponse.data.TokenHolding.length);
-
   const legacyHolders: TokenHolder[] = graphqlResponse.data.TokenHolding.map((holder, index) => ({
     TokenHolderAddress: holder.wallet_id,
     TokenId: null,
     TokenHolderQuantity: holder.currentBalance || '0',
   }));
-
-  console.log('Debug - Converted to legacy format, length:', legacyHolders.length);
 
   return {
     status: '1',
@@ -210,20 +191,14 @@ export const convertGraphQLToLegacy = (
 export const fetchAllTokenHolders = async (
   tokenId: string = '0x85d15ae02ACe2B4B5a38c835688a63F0988e2187',
 ): Promise<TokenHolder[]> => {
-  console.log(`Fetching all token holders for token: ${tokenId}`);
-
   const allHolders: TokenHolder[] = [];
   let offset = 0;
   const limit = 1000; // API limit per request
   let hasMore = true;
 
   while (hasMore) {
-    console.log(`Fetching holders batch: offset ${offset}, limit ${limit}`);
-
     const graphqlResponse = await fetchTokenHoldersGraphQLWithPagination(tokenId, limit, offset);
     const legacyResponse = convertGraphQLToLegacy(graphqlResponse);
-
-    console.log(`Batch ${Math.floor(offset / limit) + 1}: ${legacyResponse.result.length} holders`);
 
     allHolders.push(...legacyResponse.result);
 
@@ -236,13 +211,10 @@ export const fetchAllTokenHolders = async (
 
     // Safety check to prevent infinite loops
     if (offset > 50000) {
-      console.warn('Reached safety limit of 50,000 holders');
       break;
     }
   }
 
-  console.log(`Total holders fetched: ${allHolders.length}`);
-  console.log('Debug - First few holders:', allHolders.slice(0, 3));
   return allHolders;
 };
 
@@ -281,7 +253,6 @@ export const processTokenHolder = (holder: TokenHolder, rank: number): Processed
 
 // Calculate total holders from API response
 export const calculateTotalHolders = (holders: TokenHolder[]): number => {
-  console.log('Debug - calculateTotalHolders input:', holders.length, 'holders');
   return holders.length;
 };
 
@@ -394,7 +365,6 @@ export const getMockGraphQLTokenHolders = (): GraphQLTokenHolder[] => {
     });
   }
 
-  console.log(`Debug - Generated ${holders.length} mock holders`);
   return holders;
 };
 

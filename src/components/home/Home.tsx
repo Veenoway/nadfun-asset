@@ -4,8 +4,8 @@ import { useTokensByCreationTime } from '@/hooks/useTokens';
 import { formatNickname } from '@/lib/helpers';
 import { useEffect, useState } from 'react';
 import { BuySell, RecentTokens, TokenChart, TradeHistory } from '@/components/home';
-import { Copy } from 'lucide-react';
-import { KingOfTheHill, OrderTokenResponse } from '@/lib/types';
+import { Copy, Loader2 } from 'lucide-react';
+import { KingOfTheHill } from '@/lib/types';
 import { Parent } from '@/components/analytics/Parent';
 import { Drawer, DrawerTrigger, DrawerContent, Button } from '@/components/ui';
 import { DialogTitle } from '@radix-ui/react-dialog';
@@ -17,12 +17,8 @@ export interface SelectedToken {
   source: 'recent' | 'my-tokens' | 'search';
 }
 
-interface HomeProps {
-  initialTokensData: OrderTokenResponse;
-}
-
-const Home = ({ initialTokensData }: HomeProps) => {
-  const { data: tokensByCreationTime } = useTokensByCreationTime(1, 20, initialTokensData);
+const Home = () => {
+  const { data: tokensByCreationTime, isLoading: isLoadingTokens } = useTokensByCreationTime(1, 20);
   const [selectedTokens, setSelectedTokens] = useState<SelectedToken[]>([]);
   const [activeTab, setActiveTab] = useState<string>('');
 
@@ -51,6 +47,7 @@ const Home = ({ initialTokensData }: HomeProps) => {
       );
       if (existingTab) {
         setActiveTab(existingTab.tabId);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       return;
     }
@@ -71,6 +68,7 @@ const Home = ({ initialTokensData }: HomeProps) => {
       const updatedTokens = [...selectedTokens, newToken];
       setSelectedTokens(updatedTokens);
       setActiveTab(newToken.tabId);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -90,6 +88,20 @@ const Home = ({ initialTokensData }: HomeProps) => {
       setActiveTab(selectedTokens[0].tabId);
     }
   }, [selectedTokens, activeTab]);
+
+  // Show loading state while fetching initial data
+  if (isLoadingTokens) {
+    return (
+      <section>
+        <div className="flex justify-center items-center text-white px-8 max-w-screen-2xl pt-10 mx-auto w-[95%] min-h-[60vh]">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-12 h-12 animate-spin text-brandColor" />
+            <p className="text-lg text-white/60">Loading latest tokens...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section>
@@ -136,7 +148,7 @@ const Home = ({ initialTokensData }: HomeProps) => {
                   key={selectedToken.tabId}
                   className={`${activeTab === selectedToken.tabId ? 'block' : 'hidden'}`}
                 >
-                  <div className="flex ">
+                  <div className="flex pb-10">
                     <div className="w-full">
                       <div className="space-y-2">
                         <div className="mx-4 flex justify-between items-center">
@@ -186,9 +198,6 @@ const Home = ({ initialTokensData }: HomeProps) => {
                           </div>
                         </div>
                         <div className="mx-4 border border-borderColor rounded ">
-                          {/* <div className="h-[450px] bg-secondary rounded flex items-center justify-center">
-                            CHART
-                          </div> */}
                           <TokenChart
                             tokenAddress={selectedToken.token.token_info.token_id || ''}
                           />

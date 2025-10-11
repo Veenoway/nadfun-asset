@@ -3,7 +3,7 @@
 import { useTradeHistoryOne } from '@/hooks';
 import { formatMON, formatTokenBalance } from '@/lib/helpers';
 import { ExternalLink } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { isAddress } from 'viem';
 import Link from 'next/link';
 import {
@@ -26,7 +26,7 @@ const TradeHistory = ({ selectedTokens, activeTab }: TradeHistoryProps) => {
   const [tradeType, setTradeType] = useState<'ALL' | 'BUY' | 'SELL'>('ALL');
   const [direction, setDirection] = useState<'ASC' | 'DESC'>('DESC');
   const [page, setPage] = useState(1);
-  const limit = 15;
+  const limit = 11;
 
   const { data } = useTradeHistoryOne(
     selectedTokens.find((st) => st.tabId === activeTab)?.token.token_info.token_id || '',
@@ -38,6 +38,16 @@ const TradeHistory = ({ selectedTokens, activeTab }: TradeHistoryProps) => {
 
   const total = useMemo(() => data?.total, [data]);
   const trades = useMemo(() => data?.items, [data]);
+
+  // Reset page to 1 when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [tradeType, direction]);
+
+  // Calculate pagination values
+  const totalPages = Math.ceil((total ?? 1) / limit);
+  const isFirstPage = page === 1;
+  const isLastPage = page >= totalPages;
 
   return (
     <div className="mt-3 mb-8">
@@ -187,28 +197,38 @@ const TradeHistory = ({ selectedTokens, activeTab }: TradeHistoryProps) => {
           </Table>
         </div>
         <div className="flex justify-between mt-5 gap-2 items-center">
-          <div className="text-sm text-white/60">Showing {total} trades</div>
+          <div className="text-sm text-white/60">
+            Showing {trades?.length || 0} of {total} trades
+          </div>
           <div className="flex items-center gap-2">
-            {page > 1 && (
-              <Button
-                variant="filter"
-                size="filter"
-                className={`border border-borderColor text-sm px-3 py-1 rounded-md transition-all duration-200 ease-in-out bg-secondary hover:bg-terciary text-white/60 hover:text-white`}
-                onClick={() => setPage(page - 1)}
-              >
-                Prev
-              </Button>
-            )}
             <Button
               variant="filter"
               size="filter"
-              className={`border border-borderColor text-sm px-3 py-1 rounded-md transition-all duration-200 ease-in-out bg-secondary hover:bg-terciary text-white/60 hover:text-white`}
+              disabled={isFirstPage}
+              className={`border border-borderColor text-sm px-3 py-1 rounded-md transition-all duration-200 ease-in-out ${
+                isFirstPage
+                  ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                  : 'bg-secondary hover:bg-terciary text-white/60 hover:text-white'
+              }`}
+              onClick={() => setPage(page - 1)}
+            >
+              Prev
+            </Button>
+            <Button
+              variant="filter"
+              size="filter"
+              disabled={isLastPage}
+              className={`border border-borderColor text-sm px-3 py-1 rounded-md transition-all duration-200 ease-in-out ${
+                isLastPage
+                  ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                  : 'bg-secondary hover:bg-terciary text-white/60 hover:text-white'
+              }`}
               onClick={() => setPage(page + 1)}
             >
               Next
             </Button>
             <span className="text-sm text-white/60">
-              {page} of {Math.ceil(total ?? 1 / limit)}
+              Page {page} of {totalPages}
             </span>
           </div>
         </div>

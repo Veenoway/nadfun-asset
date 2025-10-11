@@ -31,8 +31,6 @@ const Parent = ({ tokenAddress }: ParentProps) => {
   const [tradingActivityTimeFrame, setTradingActivityTimeFrame] = useState('5m');
   const [token, setToken] = useState(tokenAddress); // Default token for testing
 
-  // Debug logging
-  console.log('AnalyticsPage Debug - token:', token, 'buySellTimeFrame:', buySellTimeFrame);
   const {
     totalHolders,
     newHolders,
@@ -169,13 +167,8 @@ const Parent = ({ tokenAddress }: ParentProps) => {
   // Helper function to format total supply
   const formatTotalSupply = (supply: string) => {
     const numSupply = parseFloat(supply);
-    console.log('Raw supply:', supply, 'Parsed:', numSupply);
 
-    // The API returns raw token amounts (like 999687832481502914917757221)
-    // This appears to be in the smallest unit (like wei), so we need to divide by 10^18
-    // to get the actual token amount
     const actualSupply = numSupply / 1e18;
-    console.log('Actual supply (divided by 1e18):', actualSupply);
 
     if (actualSupply >= 1e9) {
       return `${(actualSupply / 1e9).toFixed(2)}B`;
@@ -196,17 +189,6 @@ const Parent = ({ tokenAddress }: ParentProps) => {
     // Convert supply from smallest unit to actual tokens (divide by 10^18)
     const actualSupply = numSupply / 1e18;
     const marketCap = numPrice * actualSupply;
-
-    console.log(
-      'Price:',
-      price,
-      'Raw Supply:',
-      supply,
-      'Actual Supply:',
-      actualSupply,
-      'Market Cap:',
-      marketCap,
-    );
 
     if (marketCap >= 1e12) {
       return `$${(marketCap / 1e12).toFixed(2)}T`;
@@ -237,33 +219,7 @@ const Parent = ({ tokenAddress }: ParentProps) => {
 
   return (
     <div className="text-white min-h-screen p-6 overflow-auto pb-30">
-      {/* Header - Dark Professional */}
-      {/* <div className="mb-8">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-semibold mb-2 text-white">Nad.fun Pro</h1>
-            <p className="text-purple-300 text-base">
-              Comprehensive token metrics and creator insights
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <input
-              value={token}
-              onChange={(e) => setToken(e.target.value.trim())}
-              placeholder="Enter token contract address (0x...)"
-              className="w-full lg:w-[480px] bg-gray-900 border border-purple-600/30 rounded-lg px-4 py-3 text-sm text-white placeholder-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-sm"
-            />
-            <button
-              onClick={() => setToken(token)}
-              className="px-6 py-3 text-sm bg-purple-600 hover:bg-purple-700 rounded-lg text-white font-medium transition-colors shadow-sm"
-            >
-              Load Data
-            </button>
-          </div>
-        </div>
-      </div> */}
-
-      {/* Token Information Display - Compact */}
+      {/* Token Information Display */}
       {token && (
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3 text-sm">

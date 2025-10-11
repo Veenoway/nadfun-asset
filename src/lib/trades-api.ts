@@ -111,9 +111,6 @@ export const fetchRawTrades = async (
       },
     };
 
-    console.log('Fetching trades from GraphQL API:', GRAPHQL_API_BASE);
-    console.log('Query:', JSON.stringify(query, null, 2));
-
     const response = await fetch(GRAPHQL_API_BASE, {
       method: 'POST',
       headers: {
@@ -132,7 +129,6 @@ export const fetchRawTrades = async (
       throw new Error(`GraphQL errors: ${JSON.stringify(data.errors)}`);
     }
 
-    console.log(`Fetched ${data.data?.Trade?.length || 0} trades from GraphQL API`);
     return data.data?.Trade || [];
   } catch (error) {
     console.error('Error fetching raw trades from GraphQL:', error);

@@ -17,16 +17,11 @@ interface Trade {
 // Removed GraphQL interfaces and query template since we're using direct API endpoints
 
 export const fetchTrades = async (tokenId: string, timeFrame: string): Promise<Trade[]> => {
-  console.log('fetchTrades called with:', { tokenId, timeFrame });
-
   if (!tokenId || tokenId.length < 40 || !tokenId.startsWith('0x')) {
-    console.log('Invalid token ID, returning empty array');
     return [];
   }
 
   try {
-    console.log('Making API request to comprehensive-trades endpoint');
-
     const response = await fetch(
       `${API_BASE_URL}/comprehensive-trades/${tokenId}?include_trades=true`,
       {
@@ -37,14 +32,11 @@ export const fetchTrades = async (tokenId: string, timeFrame: string): Promise<T
       },
     );
 
-    console.log('API response status:', response.status);
-
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('API response data:', data);
 
     // Transform the API response to match our Trade interface
     return (data.trades || []).map((trade: any) => ({

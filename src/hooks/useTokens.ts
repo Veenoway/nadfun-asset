@@ -1,5 +1,5 @@
 import { MarketData, OrderTokenResponse, UserTokenBalancesResponse } from '@/lib/types';
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { useQuery, UseQueryResult, keepPreviousData } from '@tanstack/react-query';
 import axios from 'axios';
 
 ///order/latest_trade
@@ -12,7 +12,6 @@ import axios from 'axios';
 const useTokensByCreationTime = (
   page: number = 1,
   limit: number = 20,
-  initialData?: OrderTokenResponse,
 ): UseQueryResult<OrderTokenResponse> => {
   return useQuery({
     queryKey: ['tokens', 'creation_time', page, limit],
@@ -22,11 +21,12 @@ const useTokensByCreationTime = (
       });
       return response.data;
     },
-    initialData,
-    staleTime: 5 * 60 * 1000,
-    refetchInterval: 30 * 1000, // Auto-refetch every 30 seconds
+    staleTime: 10 * 1000,
+    refetchInterval: 10 * 1000,
     refetchIntervalInBackground: true,
-    gcTime: 10 * 60 * 1000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    gcTime: 5 * 60 * 1000,
   });
 };
 
@@ -59,7 +59,6 @@ const useTokenInfo = (tokenAddress: string): UseQueryResult<MarketData> => {
 };
 
 // Fetch token chart data
-// In useTokens.ts
 const useTokenChart = (tokenAddress: string, resolution: number = 1, countback: number = 300) => {
   const to = Math.floor(Date.now() / 1000);
 
@@ -78,17 +77,19 @@ const useTokenChart = (tokenAddress: string, resolution: number = 1, countback: 
       // Format the data for the chart
       const data = response.data;
       return {
-        t: data.t || [], // timestamps
-        o: data.o || [], // open prices
-        h: data.h || [], // high prices
-        l: data.l || [], // low prices
-        c: data.c || [], // close prices
-        v: data.v || [], // volumes
+        t: data.t || [],
+        o: data.o || [],
+        h: data.h || [],
+        l: data.l || [],
+        c: data.c || [],
+        v: data.v || [],
       };
     },
     enabled: !!tokenAddress,
-    staleTime: resolution * 1000,
-    refetchInterval: resolution * 1000,
+    placeholderData: keepPreviousData,
+    staleTime: 5 * 1000,
+    refetchInterval: 5 * 1000,
+    refetchIntervalInBackground: true,
   });
 };
 

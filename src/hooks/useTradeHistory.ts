@@ -78,9 +78,8 @@ const useTradeHistoryOne = (
         limit,
         direction,
         trade_type,
-      }).then((r) => ({ address, ...r }));
-      const { out: merged, total } = dedupeById([results]);
-      return { items: merged, total };
+      });
+      return results;
     },
     enabled: !!address,
     placeholderData: keepPreviousData,

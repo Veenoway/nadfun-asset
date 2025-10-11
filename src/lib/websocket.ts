@@ -73,13 +73,11 @@ export class MonadWebSocket {
       }
 
       this.isConnecting = true;
-      console.log('🔌 Connecting to Monad WebSocket...');
 
       try {
         this.ws = new WebSocket(this.wsUrl);
 
         this.ws.onopen = () => {
-          console.log('✅ Connected to Monad WebSocket');
           this.isConnecting = false;
           this.reconnectAttempts = 0;
           this.onConnectCallback?.();
@@ -92,14 +90,12 @@ export class MonadWebSocket {
         };
 
         this.ws.onclose = (event) => {
-          console.log('❌ WebSocket connection closed:', event.code, event.reason);
           this.isConnecting = false;
           this.onDisconnectCallback?.();
           this.handleReconnect();
         };
 
         this.ws.onerror = (error) => {
-          console.error('❌ WebSocket error:', error);
           this.isConnecting = false;
           this.onErrorCallback?.(error);
           reject(error);
@@ -114,14 +110,11 @@ export class MonadWebSocket {
 
   private handleReconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('❌ Max reconnection attempts reached');
       return;
     }
 
     this.reconnectAttempts++;
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
-
-    console.log(`🔄 Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
 
     setTimeout(() => {
       this.connect().catch(console.error);
