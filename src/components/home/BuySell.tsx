@@ -32,10 +32,10 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
   const tradingAmount = mode === 'buy' ? fromAmount : tokenAmount;
   const {
     isLoading: isTradingLoading,
-
     isSuccess: isTradeSuccess,
     isListed,
     isLocked,
+    isApprovingDex,
     buyToken,
     sellToken,
     amountOut,
@@ -86,9 +86,9 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
       return;
     }
 
-    // Check if token is available for bonding curve
-    if (isListed || isLocked) {
-      console.error('Token is listed or locked, cannot use bonding curve');
+    if (isLocked && !isListed) {
+      console.error('Token is locked and cannot be traded');
+      toast.error('Token is locked and cannot be traded');
       return;
     }
 
@@ -284,10 +284,18 @@ const BuySell = ({ selectedToken, isFromMyTokens }: BuySellProps) => {
       <div className="px-4">
         <button
           onClick={handleSwap}
-          disabled={isTradingLoading || isListed || isLocked}
+          disabled={isTradingLoading || (isLocked && !isListed)}
           className="w-full bg-brandColor cursor-pointer hover:bg-brandColor/80 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 text-sm font-medium rounded transition-colors"
         >
-          {isTradingLoading ? 'PROCESSING...' : mode === 'buy' ? 'BUY TOKENS' : 'SELL TOKENS'}
+          {isTradingLoading
+            ? isApprovingDex
+              ? 'APPROVING...'
+              : 'PROCESSING...'
+            : isLocked && !isListed
+              ? 'TOKEN LOCKED'
+              : mode === 'buy'
+                ? 'BUY TOKENS'
+                : 'SELL TOKENS'}
         </button>
       </div>
     </div>

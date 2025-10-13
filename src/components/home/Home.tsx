@@ -23,7 +23,6 @@ const Home = () => {
   const [activeTab, setActiveTab] = useState<string>('');
 
   useEffect(() => {
-    //set the default token if no tokens are selected yet
     if (tokensByCreationTime?.king_of_the_hill && selectedTokens.length === 0) {
       setSelectedTokens([
         {
@@ -89,7 +88,6 @@ const Home = () => {
     }
   }, [selectedTokens, activeTab]);
 
-  // Show loading state while fetching initial data
   if (isLoadingTokens) {
     return (
       <section>
@@ -105,7 +103,7 @@ const Home = () => {
 
   return (
     <section>
-      <div className="flex justify-between text-white px-8 max-w-screen-2xl pt-10 mx-auto w-[95%]">
+      <div className="flex justify-between text-white xl:px-8 max-w-screen-2xl pt-10 mx-auto w-[95%]">
         {/* Tabs Section */}
         <div className="w-full rounded-lg">
           {selectedTokens.length === 0 ? (
@@ -115,7 +113,7 @@ const Home = () => {
           ) : (
             <>
               {/* Tab Headers */}
-              <div className="flex border-gray-600 ml-3.5 mb-3">
+              <div className="flex border-gray-600 mb-3">
                 {selectedTokens.map((selectedToken) => (
                   <div
                     key={selectedToken.tabId}
@@ -134,7 +132,7 @@ const Home = () => {
                         e.stopPropagation();
                         handleTabRemove(selectedToken.tabId);
                       }}
-                      className="text-gray-500 hover:text-red-400 text-xs"
+                      className="text-gray-500 hover:text-red-400 text-xs cursor-pointer"
                     >
                       ×
                     </button>
@@ -148,10 +146,11 @@ const Home = () => {
                   key={selectedToken.tabId}
                   className={`${activeTab === selectedToken.tabId ? 'block' : 'hidden'}`}
                 >
-                  <div className="flex pb-10">
-                    <div className="w-full">
+                  <div className="flex gap-5">
+                    {/* Left Panel */}
+                    <div className="w-full max-w-[calc(100%-400px)]">
                       <div className="space-y-2">
-                        <div className="mx-4 flex justify-between items-center">
+                        <div className="flex justify-between items-center">
                           <div className="flex items-center gap-2">
                             <h6 className="text-xs text-gray-500">
                               ${selectedToken.token.token_info.symbol}
@@ -197,28 +196,31 @@ const Home = () => {
                             </Drawer>
                           </div>
                         </div>
-                        <div className="mx-4 border border-borderColor rounded ">
+                        <div className="border border-borderColor rounded">
                           <TokenChart
                             tokenAddress={selectedToken.token.token_info.token_id || ''}
                           />
                         </div>
-                        <div className="px-4 rounded-lg">
+                        <div className="rounded-lg">
                           <TradeHistory selectedTokens={selectedTokens} activeTab={activeTab} />
                         </div>
                       </div>
                     </div>
 
-                    <div className="min-w-[400px] h-fit space-y-3">
+                    {/* Right Panel - Sticky */}
+                    <div className="min-w-[400px] space-y-3 sticky top-4 self-start max-h-[calc(100vh-2rem)]">
                       <div className="bg-secondary border border-borderColor rounded pb-4">
                         <BuySell
                           selectedToken={selectedToken.token}
                           isFromMyTokens={selectedToken.source === 'my-tokens'}
                         />
                       </div>
-                      <RecentTokens
-                        tokensByCreationTime={tokensByCreationTime}
-                        handleTokenSelect={handleTokenSelect}
-                      />
+                      <div className="overflow-y-auto lg:h-[calc(100vh-270px)] 2xl:h-[calc(100vh-320px)]">
+                        <RecentTokens
+                          tokensByCreationTime={tokensByCreationTime}
+                          handleTokenSelect={handleTokenSelect}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

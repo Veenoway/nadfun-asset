@@ -131,15 +131,16 @@ const useUserTokenBalances = (
     queryKey: ['user', 'token-balances', accountAddress],
     queryFn: async () => {
       if (!accountAddress) return null;
-      //profile/hold-token/0xe329ce7EcB851c09948e5F507F1a6FfA40De055B?account_id=0xe329ce7EcB851c09948e5F507F1a6FfA40De055B&page=1&limit=10
       const response = await axios.get(`/api/nadfun/profile/hold-token/${accountAddress}`, {
         params: { account_id: accountAddress, page: 1, limit: 15 },
       });
       return response.data;
     },
     enabled: !!accountAddress,
-    staleTime: 30 * 1000, // Refresh every 30 seconds
+    staleTime: 0,
     gcTime: 5 * 60 * 1000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 };
 
