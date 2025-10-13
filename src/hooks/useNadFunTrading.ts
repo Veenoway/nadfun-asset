@@ -5,15 +5,18 @@ import {
   useWriteContract,
   useWaitForTransactionReceipt,
   useSignTypedData,
+  usePublicClient,
 } from 'wagmi';
 import { parseEther, formatEther } from 'viem';
 import {
   NADFUN_CONTRACTS,
   BONDING_CURVE_ABI,
   BONDING_CURVE_ROUTER_ABI,
+  DEX_ROUTER_ABI,
   ERC20_PERMIT_ABI,
+  ERC20_ABI,
 } from '@/lib/contracts';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 export interface TradingParams {
   tokenAddress: string;
@@ -47,13 +50,15 @@ interface PermitSignature {
 const useNadFunTrading = (tokenAddress?: string, amountIn?: string, isSellMode?: boolean) => {
   const { address } = useAccount();
   const { data: balance } = useBalance({ address });
+  const publicClient = usePublicClient();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingSellParams, setPendingSellParams] = useState<TradingParams | null>(null);
+  const [isApprovingDex, setIsApprovingDex] = useState(false);
 
   // Sign typed data for permit
   const { signTypedDataAsync } = useSignTypedData();
 
-  // Check if token is listed on bonding curve
   const { data: isListed } = useReadContract({
     address: NADFUN_CONTRACTS.BONDING_CURVE,
     abi: BONDING_CURVE_ABI,
@@ -61,7 +66,6 @@ const useNadFunTrading = (tokenAddress?: string, amountIn?: string, isSellMode?:
     args: tokenAddress ? [tokenAddress as `0x${string}`] : undefined,
   });
 
-  // Check if token is locked
   const { data: isLocked } = useReadContract({
     address: NADFUN_CONTRACTS.BONDING_CURVE,
     abi: BONDING_CURVE_ABI,
@@ -83,22 +87,68 @@ const useNadFunTrading = (tokenAddress?: string, amountIn?: string, isSellMode?:
     functionName: 'name',
   });
 
-  // Write contract for trading
   const {
     data: tradeHash,
     writeContract: executeTrade,
     isPending: isTradePending,
   } = useWriteContract();
 
-  // Wait for transaction
   const { isLoading: isConfirming, isSuccess: isTradeSuccess } = useWaitForTransactionReceipt({
     hash: tradeHash,
   });
 
+  // Auto-execute sell
+  useEffect(() => {
+    if (isTradeSuccess && pendingSellParams && isListed && address && isApprovingDex) {
+      const executeSell = async () => {
+        try {
+          const amountInWei = parseEther(pendingSellParams.amountIn);
+          const amountOutMinWei = pendingSellParams.amountOutMin
+            ? parseEther(pendingSellParams.amountOutMin)
+            : BigInt(1);
+          const deadline = BigInt(Math.floor(Date.now() / 1000) + 300);
+
+          setIsApprovingDex(false);
+
+          executeTrade({
+            address: NADFUN_CONTRACTS.DEX_ROUTER,
+            abi: DEX_ROUTER_ABI,
+            functionName: 'sell',
+            args: [
+              {
+                token: pendingSellParams.tokenAddress as `0x${string}`,
+                amountIn: amountInWei,
+                amountOutMin: amountOutMinWei,
+                to: address as `0x${string}`,
+                deadline,
+              },
+            ],
+          });
+
+          // Clear pending params
+          setPendingSellParams(null);
+        } catch (err) {
+          console.error('Error executing sell after approval:', err);
+          setError('Failed to execute sell after approval');
+          setPendingSellParams(null);
+          setIsApprovingDex(false);
+        }
+      };
+
+      executeSell();
+    }
+  }, [isTradeSuccess, pendingSellParams, isListed, address, executeTrade, isApprovingDex]);
+
+  // Determine which router to use based on market type
+  const routerAddress = isListed
+    ? NADFUN_CONTRACTS.DEX_ROUTER
+    : NADFUN_CONTRACTS.BONDING_CURVE_ROUTER;
+  const routerAbi = isListed ? DEX_ROUTER_ABI : BONDING_CURVE_ROUTER_ABI;
+
   // Get amount out for buying
   const { data: amountOutBuy } = useReadContract({
-    address: NADFUN_CONTRACTS.BONDING_CURVE_ROUTER,
-    abi: BONDING_CURVE_ROUTER_ABI,
+    address: routerAddress,
+    abi: routerAbi,
     functionName: 'getAmountOut',
     args:
       tokenAddress && amountIn && !isSellMode
@@ -108,8 +158,8 @@ const useNadFunTrading = (tokenAddress?: string, amountIn?: string, isSellMode?:
 
   // Get amount out for selling
   const { data: amountOutSell } = useReadContract({
-    address: NADFUN_CONTRACTS.BONDING_CURVE_ROUTER,
-    abi: BONDING_CURVE_ROUTER_ABI,
+    address: routerAddress,
+    abi: routerAbi,
     functionName: 'getAmountOut',
     args:
       tokenAddress && amountIn && isSellMode
@@ -119,7 +169,7 @@ const useNadFunTrading = (tokenAddress?: string, amountIn?: string, isSellMode?:
 
   const amountOut = isSellMode ? amountOutSell : amountOutBuy;
 
-  // Buy tokens using bonding curve
+  // Buy tokens - routes to DEX or Bonding Curve automatically
   const buyToken = useCallback(
     async ({ tokenAddress, amountIn, amountOutMin }: TradingParams) => {
       if (!address || !tokenAddress) {
@@ -132,9 +182,9 @@ const useNadFunTrading = (tokenAddress?: string, amountIn?: string, isSellMode?:
         return;
       }
 
-      // Check if token is available for bonding curve
-      if (isListed || isLocked) {
-        setError('Token is listed or locked, cannot use bonding curve');
+      // Check if token is locked WITHOUT being listed (listed tokens are locked on curve but tradeable on DEX)
+      if (isLocked && !isListed) {
+        setError('Token is locked and cannot be traded');
         return;
       }
 
@@ -143,23 +193,42 @@ const useNadFunTrading = (tokenAddress?: string, amountIn?: string, isSellMode?:
 
       try {
         const amountInWei = parseEther(amountIn);
-        const amountOutMinWei = amountOutMin ? parseEther(amountOutMin) : BigInt(0);
+        const amountOutMinWei = amountOutMin ? parseEther(amountOutMin) : BigInt(1);
         const deadline = BigInt(Math.floor(Date.now() / 1000) + 300);
 
-        executeTrade({
-          address: NADFUN_CONTRACTS.BONDING_CURVE_ROUTER,
-          abi: BONDING_CURVE_ROUTER_ABI,
-          functionName: 'buy',
-          args: [
-            {
-              amountOutMin: amountOutMinWei,
-              token: tokenAddress as `0x${string}`,
-              to: address,
-              deadline,
-            },
-          ],
-          value: amountInWei,
-        });
+        if (isListed) {
+          // Route to DEX
+          executeTrade({
+            address: NADFUN_CONTRACTS.DEX_ROUTER,
+            abi: DEX_ROUTER_ABI,
+            functionName: 'buy',
+            args: [
+              {
+                token: tokenAddress as `0x${string}`,
+                amountOutMin: amountOutMinWei,
+                to: address,
+                deadline,
+              },
+            ],
+            value: amountInWei,
+          });
+        } else {
+          // Route to Bonding Curve
+          executeTrade({
+            address: NADFUN_CONTRACTS.BONDING_CURVE_ROUTER,
+            abi: BONDING_CURVE_ROUTER_ABI,
+            functionName: 'buy',
+            args: [
+              {
+                amountOutMin: amountOutMinWei,
+                token: tokenAddress as `0x${string}`,
+                to: address,
+                deadline,
+              },
+            ],
+            value: amountInWei,
+          });
+        }
       } catch (err) {
         console.error('Error buying token:', err);
         setError(err instanceof Error ? err.message : 'Failed to buy token');
@@ -170,7 +239,7 @@ const useNadFunTrading = (tokenAddress?: string, amountIn?: string, isSellMode?:
     [address, isListed, isLocked, executeTrade],
   );
 
-  // Sell tokens using bonding curve with permit
+  // Sell tokens - routes to DEX or Bonding Curve automatically
   const sellToken = useCallback(
     async ({ tokenAddress, amountIn, amountOutMin }: TradingParams) => {
       if (!address || !tokenAddress) {
@@ -183,9 +252,9 @@ const useNadFunTrading = (tokenAddress?: string, amountIn?: string, isSellMode?:
         return;
       }
 
-      // Check if token is available for bonding curve
-      if (isListed || isLocked) {
-        setError('Token is listed or locked, cannot use bonding curve');
+      // Check if token is locked WITHOUT being listed (listed tokens are locked on curve but tradeable on DEX)
+      if (isLocked && !isListed) {
+        setError('Token is locked and cannot be traded');
         return;
       }
 
@@ -194,91 +263,141 @@ const useNadFunTrading = (tokenAddress?: string, amountIn?: string, isSellMode?:
 
       try {
         const amountInWei = parseEther(amountIn);
-        const amountOutMinWei = amountOutMin ? parseEther(amountOutMin) : BigInt(0);
+        const amountOutMinWei = amountOutMin ? parseEther(amountOutMin) : BigInt(1);
         const deadline = BigInt(Math.floor(Date.now() / 1000) + 300);
 
-        // Create permit signature
-        const permitDeadline = BigInt(Math.floor(Date.now() / 1000) + 300);
-        const maxAllowance = BigInt(
-          '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-        );
+        if (isListed) {
+          // Route to DEX
+          let currentAllowanceBigInt = BigInt(0);
 
-        const permitData = {
-          domain: {
-            name: tokenName || 'Token',
-            version: '1',
-            chainId: 10143,
-            verifyingContract: tokenAddress as `0x${string}`,
-          },
-          message: {
-            owner: address,
-            spender: NADFUN_CONTRACTS.BONDING_CURVE_ROUTER,
-            value: maxAllowance,
-            nonce: tokenNonce || BigInt(0),
-            deadline: permitDeadline,
-          },
-          primaryType: 'Permit',
-          types: {
-            EIP712Domain: [
-              { name: 'name', type: 'string' },
-              { name: 'version', type: 'string' },
-              { name: 'chainId', type: 'uint256' },
-              { name: 'verifyingContract', type: 'address' },
-            ],
-            Permit: [
-              { name: 'owner', type: 'address' },
-              { name: 'spender', type: 'address' },
-              { name: 'value', type: 'uint256' },
-              { name: 'nonce', type: 'uint256' },
-              { name: 'deadline', type: 'uint256' },
-            ],
-          },
-        };
+          if (publicClient) {
+            try {
+              const allowanceResult = await publicClient.readContract({
+                address: tokenAddress as `0x${string}`,
+                abi: ERC20_ABI,
+                functionName: 'allowance',
+                args: [address as `0x${string}`, NADFUN_CONTRACTS.DEX_ROUTER as `0x${string}`],
+              });
+              currentAllowanceBigInt = allowanceResult as bigint;
+            } catch (err) {
+              console.error('Error reading allowance:', err);
+              currentAllowanceBigInt = BigInt(0);
+            }
+          }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const signature = await signTypedDataAsync(permitData as any);
+          const needsApproval = currentAllowanceBigInt < amountInWei;
 
-        // Split signature into v, r, s
-        const sig = signature.slice(2);
-        const r = `0x${sig.slice(0, 64)}`;
-        const s = `0x${sig.slice(64, 128)}`;
-        const v = parseInt(sig.slice(128, 130), 16);
+          if (needsApproval) {
+            setPendingSellParams({ tokenAddress, amountIn, amountOutMin });
+            setIsApprovingDex(true);
 
-        let permitSignature: PermitSignature | null = null;
+            executeTrade({
+              address: tokenAddress as `0x${string}`,
+              abi: ERC20_ABI,
+              functionName: 'approve',
+              args: [NADFUN_CONTRACTS.DEX_ROUTER as `0x${string}`, amountInWei],
+            });
+            return;
+          }
 
-        permitSignature = {
-          tokenAddress,
-          owner: address,
-          spender: NADFUN_CONTRACTS.BONDING_CURVE_ROUTER,
-          value: maxAllowance.toString(),
-          deadline: Number(permitDeadline),
-          nonce: (tokenNonce || BigInt(0)).toString(),
-          v,
-          r,
-          s,
-          timestamp: Math.floor(Date.now() / 1000),
-        };
-
-        // Execute sell with permit
-        if (permitSignature) {
+          // Step 2: Execute sell (if already approved)
           executeTrade({
-            address: NADFUN_CONTRACTS.BONDING_CURVE_ROUTER,
-            abi: BONDING_CURVE_ROUTER_ABI,
-            functionName: 'sellPermit',
+            address: NADFUN_CONTRACTS.DEX_ROUTER,
+            abi: DEX_ROUTER_ABI,
+            functionName: 'sell',
             args: [
               {
+                token: tokenAddress as `0x${string}`,
                 amountIn: amountInWei,
                 amountOutMin: amountOutMinWei,
-                amountAllowance: BigInt(permitSignature.value),
-                token: tokenAddress as `0x${string}`,
                 to: address,
                 deadline,
-                v: permitSignature.v,
-                r: permitSignature.r as `0x${string}`,
-                s: permitSignature.s as `0x${string}`,
               },
             ],
           });
+        } else {
+          // Route to Bonding Curve
+          const permitDeadline = BigInt(Math.floor(Date.now() / 1000) + 300);
+          const maxAllowance = BigInt(
+            '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+          );
+
+          const permitData = {
+            domain: {
+              name: tokenName || 'Token',
+              version: '1',
+              chainId: 10143,
+              verifyingContract: tokenAddress as `0x${string}`,
+            },
+            message: {
+              owner: address,
+              spender: NADFUN_CONTRACTS.BONDING_CURVE_ROUTER,
+              value: maxAllowance,
+              nonce: tokenNonce || BigInt(0),
+              deadline: permitDeadline,
+            },
+            primaryType: 'Permit',
+            types: {
+              EIP712Domain: [
+                { name: 'name', type: 'string' },
+                { name: 'version', type: 'string' },
+                { name: 'chainId', type: 'uint256' },
+                { name: 'verifyingContract', type: 'address' },
+              ],
+              Permit: [
+                { name: 'owner', type: 'address' },
+                { name: 'spender', type: 'address' },
+                { name: 'value', type: 'uint256' },
+                { name: 'nonce', type: 'uint256' },
+                { name: 'deadline', type: 'uint256' },
+              ],
+            },
+          };
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const signature = await signTypedDataAsync(permitData as any);
+
+          const sig = signature.slice(2);
+          const r = `0x${sig.slice(0, 64)}`;
+          const s = `0x${sig.slice(64, 128)}`;
+          const v = parseInt(sig.slice(128, 130), 16);
+
+          let permitSignature: PermitSignature | null = null;
+
+          permitSignature = {
+            tokenAddress,
+            owner: address,
+            spender: NADFUN_CONTRACTS.BONDING_CURVE_ROUTER,
+            value: maxAllowance.toString(),
+            deadline: Number(permitDeadline),
+            nonce: (tokenNonce || BigInt(0)).toString(),
+            v,
+            r,
+            s,
+            timestamp: Math.floor(Date.now() / 1000),
+          };
+
+          // Execute sell with permit
+          if (permitSignature) {
+            executeTrade({
+              address: NADFUN_CONTRACTS.BONDING_CURVE_ROUTER,
+              abi: BONDING_CURVE_ROUTER_ABI,
+              functionName: 'sellPermit',
+              args: [
+                {
+                  amountIn: amountInWei,
+                  amountOutMin: amountOutMinWei,
+                  amountAllowance: BigInt(permitSignature.value),
+                  token: tokenAddress as `0x${string}`,
+                  to: address,
+                  deadline,
+                  v: permitSignature.v,
+                  r: permitSignature.r as `0x${string}`,
+                  s: permitSignature.s as `0x${string}`,
+                },
+              ],
+            });
+          }
         }
       } catch (err) {
         console.error('Error selling token:', err);
@@ -306,10 +425,11 @@ const useNadFunTrading = (tokenAddress?: string, amountIn?: string, isSellMode?:
   return {
     isLoading: isLoading || isTradePending || isConfirming,
     error,
-    isSuccess: isTradeSuccess,
+    isSuccess: isTradeSuccess && !isApprovingDex,
     isListed,
     isLocked,
     amountOut: amountOut ? formatEther(amountOut) : null,
+    isApprovingDex,
 
     buyToken,
     sellToken,

@@ -7,6 +7,58 @@ export const NADFUN_CONTRACTS = {
   WMON: '0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701',
 } as const;
 
+// ERC20 Standard ABI with approve function
+export const ERC20_ABI = [
+  {
+    type: 'function',
+    name: 'approve',
+    inputs: [
+      {
+        name: 'spender',
+        type: 'address',
+        internalType: 'address',
+      },
+      {
+        name: 'amount',
+        type: 'uint256',
+        internalType: 'uint256',
+      },
+    ],
+    outputs: [
+      {
+        name: '',
+        type: 'bool',
+        internalType: 'bool',
+      },
+    ],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    name: 'allowance',
+    inputs: [
+      {
+        name: 'owner',
+        type: 'address',
+        internalType: 'address',
+      },
+      {
+        name: 'spender',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+        internalType: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+  },
+] as const;
+
 // ERC20 Permit ABI for EIP-2612 permit functionality
 export const ERC20_PERMIT_ABI = [
   {

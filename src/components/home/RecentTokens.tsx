@@ -30,10 +30,10 @@ const RecentTokens = ({ tokensByCreationTime, handleTokenSelect }: RecentTokensP
   const { data: searchResults, isLoading: isSearching } = useTokenSearch(searchQuery);
 
   return (
-    <div className="w-full space-y-4 p-2 pt-1 mr-2 rounded tokens bg-secondary border border-borderColor">
+    <div className="w-full h-full flex flex-col pt-1 p-2 rounded tokens bg-secondary border border-borderColor overflow-hidden">
       <div className="flex justify-between border-b border-white/10">
         <button
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
+          className={`px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
             activeTab === 'recent'
               ? 'text-white border-b-2 border-white'
               : 'text-white/60 hover:text-white'
@@ -43,7 +43,7 @@ const RecentTokens = ({ tokensByCreationTime, handleTokenSelect }: RecentTokensP
           Recent Tokens
         </button>
         <button
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
+          className={`px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
             activeTab === 'my-tokens'
               ? 'text-white border-b-2 border-white'
               : 'text-white/60 hover:text-white'
@@ -53,7 +53,7 @@ const RecentTokens = ({ tokensByCreationTime, handleTokenSelect }: RecentTokensP
           My Tokens
         </button>
         <button
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
+          className={`px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
             activeTab === 'search'
               ? 'text-white border-b-2 border-white'
               : 'text-white/60 hover:text-white'
@@ -64,7 +64,7 @@ const RecentTokens = ({ tokensByCreationTime, handleTokenSelect }: RecentTokensP
         </button>
       </div>
 
-      <div className="2xl:max-h-[calc(100vh-200px)] h-[100vh] overflow-y-auto min-w-[300px] no-scrollbar">
+      <div className="flex-1 overflow-y-auto min-w-[300px] custom-scrollbar min-h-0 pt-3">
         {activeTab === 'recent' && (
           <div className="space-y-2">
             {/* King of the Hill Token */}
@@ -292,9 +292,6 @@ const RecentTokens = ({ tokensByCreationTime, handleTokenSelect }: RecentTokensP
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-[10px] text-white bg-quaternary px-1 rounded">
                             {formatRelativeTime(Number(token.created_at))}
-                          </span>
-                          <span className="text-[10px] text-brandColor font-normal">
-                            Search Result
                           </span>
                         </div>
 

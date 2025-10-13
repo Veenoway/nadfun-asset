@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Nadfun+',
-  description: 'Nadfun+',
+  title: 'Devnad.fun',
+  description: 'Devnad.fun',
 };
 
 export default function RootLayout({
