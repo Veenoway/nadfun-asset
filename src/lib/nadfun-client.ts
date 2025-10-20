@@ -57,7 +57,8 @@ class NadfunClient {
   private async callDirectAPI(endpoint: string, tokenAddress: string): Promise<any> {
     try {
       // Use the direct API endpoint
-      const response = await fetch(`http://localhost:8002${endpoint}`, {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_NADFUN_API_URL || 'http://localhost:8002';
+      const response = await fetch(`${apiBaseUrl}${endpoint}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
