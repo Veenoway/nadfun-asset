@@ -1,16 +1,16 @@
 module.exports = {
   '**/*.{ts,tsx}': (filenames) => [
-    'yarn type-check',
-    `yarn eslint ${filenames.join(' ')}`,
-    `yarn prettier --write ${filenames.join(' ')}`,
+    'npm run type-check',
+    `npm run lint ${filenames.join(' ')}`,
+    `npx prettier --write ${filenames.join(' ')}`,
   ],
 
   '**/*.{js,jsx}': (filenames) => [
-    `yarn eslint ${filenames.join(' ')}`,
-    `yarn prettier --write ${filenames.join(' ')}`,
+    `npm run lint ${filenames.join(' ')}`,
+    `npx prettier --write ${filenames.join(' ')}`,
   ],
 
   '**/*.{json,css,scss,md,yml,yaml}': (filenames) => [
-    `yarn prettier --write ${filenames.join(' ')}`,
+    `npx prettier --write ${filenames.join(' ')}`,
   ],
 };
