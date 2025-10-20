@@ -59,9 +59,7 @@
     "typescript": "^5"
   },
   "engines": {
-    "yarn": ">=4.0.0",
-    "npm": "please-use-yarn",
-    "pnpm": "please-use-yarn"
-  },
-  "packageManager": "yarn@4.9.4"
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
 }
