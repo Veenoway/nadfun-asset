@@ -1,5 +1,5 @@
 // Direct GraphQL trades API client for raw trade data
-const GRAPHQL_API_BASE = 'https://indexer.dev.hyperindex.xyz/23e7961/v1/graphql';
+const GRAPHQL_API_BASE = 'http://173.249.24.245:8082/v1/graphql';
 
 export interface RawTrade {
   id: string;
