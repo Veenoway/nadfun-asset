@@ -1,7 +1,7 @@
 // API service for crypto analytics dashboard
 
 // GraphQL API for token holders
-const GRAPHQL_API_URL = 'https://indexer.dev.hyperindex.xyz/23e7961/v1/graphql';
+const GRAPHQL_API_URL = 'http://173.249.24.245:8082/v1/graphql';
 
 // Set to true to use mock data instead of API calls (for development/testing)
 const USE_MOCK_DATA = false; // Set to false to use real API data
