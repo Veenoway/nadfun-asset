@@ -1,8 +1,16 @@
 // API service for crypto analytics dashboard
 
-// GraphQL API for token holders
-const GRAPHQL_API_URL =
-  process.env.NEXT_PUBLIC_GRAPHQL_API_URL || 'http://173.249.24.245:8082/v1/graphql';
+// GraphQL API for token holders - with fallback endpoints
+const getGraphQLApiUrl = () => {
+  if (process.env.NEXT_PUBLIC_GRAPHQL_API_URL) {
+    return process.env.NEXT_PUBLIC_GRAPHQL_API_URL;
+  }
+
+  // Fallback to the secondary API endpoint for Vercel deployment
+  return 'https://indexer.dev.hyperindex.xyz/69bcde5/v1/graphql';
+};
+
+const GRAPHQL_API_URL = getGraphQLApiUrl();
 
 // Set to true to use mock data instead of API calls (for development/testing)
 const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true';
